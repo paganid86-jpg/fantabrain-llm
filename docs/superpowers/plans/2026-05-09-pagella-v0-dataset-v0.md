@@ -488,7 +488,7 @@ Expected: one commit with the versioned training data and README update.
 **Files:**
 - Generated ignored files under `data/processed/`, `data/eval/`, and `reports/runs/`
 
-- [ ] **Step 1: Run the v0 audit CLI**
+- [x] **Step 1: Run the v0 audit CLI**
 
 Run:
 
@@ -504,7 +504,7 @@ FantaBrain v0 audit passed
   pagella: benchmarks/pagella_v0.jsonl (40 examples)
 ```
 
-- [ ] **Step 2: Prepare v0 training file without random holdout**
+- [x] **Step 2: Prepare v0 training file without random holdout**
 
 Run:
 
@@ -521,7 +521,7 @@ FantaBrain dataset prepared
   eval:   data/eval/v0_holdout.jsonl (0 examples)
 ```
 
-- [ ] **Step 3: Generate the manual pagella report**
+- [x] **Step 3: Generate the manual pagella report**
 
 Run:
 
@@ -531,7 +531,7 @@ python scripts/run_eval.py --eval benchmarks/pagella_v0.jsonl --run-name pagella
 
 Expected: `reports/runs/pagella-v0-manual-review/manual_review.md` exists and contains 40 cases.
 
-- [ ] **Step 4: Run compile check**
+- [x] **Step 4: Run compile check**
 
 Run:
 
@@ -541,7 +541,7 @@ python -m compileall src scripts tests
 
 Expected: all files compile.
 
-- [ ] **Step 5: Run all tests**
+- [x] **Step 5: Run all tests**
 
 Run:
 
