@@ -68,7 +68,7 @@ The assistant answer should usually be 70-130 Italian words. Refusal/grounding a
 - Create: `scripts/audit_v0.py`
 - Create: `tests/test_v0_audit.py`
 
-- [ ] **Step 1: Write failing tests for aggregate counts**
+- [x] **Step 1: Write failing tests for aggregate counts**
 
 Create `tests/test_v0_audit.py` with:
 
@@ -145,7 +145,7 @@ def test_audit_train_eval_split_rejects_duplicate_user_prompt(tmp_path: Path) ->
         audit_train_eval_split(load_examples(train_path), load_examples(eval_path))
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run:
 
@@ -155,7 +155,7 @@ python -m pytest tests/test_v0_audit.py -v
 
 Expected: FAIL because `fantabrain_llm.audit` does not exist.
 
-- [ ] **Step 3: Implement `src/fantabrain_llm/audit.py`**
+- [x] **Step 3: Implement `src/fantabrain_llm/audit.py`**
 
 Use this implementation:
 
@@ -259,7 +259,7 @@ def audit_train_eval_split(
         raise AuditError(f"train/eval leakage detected for prompts: {overlap[:3]}")
 ```
 
-- [ ] **Step 4: Implement `scripts/audit_v0.py`**
+- [x] **Step 4: Implement `scripts/audit_v0.py`**
 
 Use this implementation:
 
@@ -312,7 +312,7 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
-- [ ] **Step 5: Run tests to verify audit core passes**
+- [x] **Step 5: Run tests to verify audit core passes**
 
 Run:
 
@@ -322,7 +322,7 @@ python -m pytest tests/test_v0_audit.py -v
 
 Expected: PASS.
 
-- [ ] **Step 6: Commit audit tooling**
+- [x] **Step 6: Commit audit tooling**
 
 Run:
 
