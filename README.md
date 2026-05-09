@@ -76,6 +76,14 @@ python scripts/run_eval.py `
   --run-name seed-manual-review
 ```
 
+Pagella v0:
+
+```powershell
+python scripts/run_eval.py `
+  --eval benchmarks/pagella_v0.jsonl `
+  --run-name pagella-v0-manual-review
+```
+
 La pagella crea un report Markdown con prompt, risposta attesa e checklist di qualita.
 
 ## Slang

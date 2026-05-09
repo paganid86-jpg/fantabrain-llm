@@ -341,7 +341,7 @@ Expected: one commit with audit code and tests.
 - Create: `benchmarks/pagella_v0.jsonl`
 - Modify: `README.md`
 
-- [ ] **Step 1: Create the benchmarks directory**
+- [x] **Step 1: Create the benchmarks directory**
 
 Run:
 
@@ -351,7 +351,7 @@ New-Item -ItemType Directory -Force benchmarks
 
 Expected: `benchmarks/` exists.
 
-- [ ] **Step 2: Author 40 blind pagella rows**
+- [x] **Step 2: Author 40 blind pagella rows**
 
 Create `benchmarks/pagella_v0.jsonl` with exactly 40 JSONL rows. Use the shared system prompt from `src/fantabrain_llm/prompts.py`.
 
@@ -380,7 +380,7 @@ Use this exact row shape for every entry:
 
 All 40 prompts must be distinct from each other and from `datasets/v0/train.jsonl`.
 
-- [ ] **Step 3: Run pagella row validation**
+- [x] **Step 3: Run pagella row validation**
 
 Run:
 
@@ -390,7 +390,7 @@ python scripts/run_eval.py --eval benchmarks/pagella_v0.jsonl --run-name pagella
 
 Expected: a Markdown report under `reports/runs/pagella-v0-smoke/manual_review.md`.
 
-- [ ] **Step 4: Update README pagella command**
+- [x] **Step 4: Update README pagella command**
 
 Add this command to `README.md` under "Pagella manuale":
 
@@ -400,7 +400,7 @@ python scripts/run_eval.py `
   --run-name pagella-v0-manual-review
 ```
 
-- [ ] **Step 5: Commit pagella data**
+- [x] **Step 5: Commit pagella data**
 
 Run:
 
