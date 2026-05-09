@@ -51,6 +51,16 @@ python scripts/prepare_dataset.py `
   --eval-ratio 0.34
 ```
 
+Dataset v0:
+
+```powershell
+python scripts/prepare_dataset.py `
+  --input datasets/v0/train.jsonl `
+  --output data/processed/v0_train.jsonl `
+  --eval-output data/eval/v0_holdout.jsonl `
+  --eval-ratio 0
+```
+
 ## Smoke test
 
 ```powershell

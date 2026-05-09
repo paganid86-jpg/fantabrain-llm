@@ -419,7 +419,7 @@ Expected: one commit with the versioned pagella and README update.
 - Create: `datasets/v0/train.jsonl`
 - Modify: `README.md`
 
-- [ ] **Step 1: Create the dataset directory**
+- [x] **Step 1: Create the dataset directory**
 
 Run:
 
@@ -429,7 +429,7 @@ New-Item -ItemType Directory -Force datasets\v0
 
 Expected: `datasets/v0/` exists.
 
-- [ ] **Step 2: Author 120 supervised training rows**
+- [x] **Step 2: Author 120 supervised training rows**
 
 Create `datasets/v0/train.jsonl` with exactly 120 JSONL rows. Use the shared system prompt from `src/fantabrain_llm/prompts.py`.
 
@@ -458,7 +458,7 @@ Use this exact row shape for every entry:
 
 Training prompts must be distinct from every pagella prompt. Keep examples practical and varied, but do not use live facts, private data, or current injury/news claims.
 
-- [ ] **Step 3: Update README dataset command**
+- [x] **Step 3: Update README dataset command**
 
 Add this command to `README.md` under "Primo giro dati":
 
@@ -470,7 +470,7 @@ python scripts/prepare_dataset.py `
   --eval-ratio 0
 ```
 
-- [ ] **Step 4: Commit dataset data**
+- [x] **Step 4: Commit dataset data**
 
 Run:
 
