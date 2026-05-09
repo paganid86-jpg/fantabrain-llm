@@ -559,7 +559,7 @@ Expected: all tests pass after installing dev dependencies.
 - Modify: `C:\Users\DantePagani\llm-memory\wiki\projects\fantabrain-llm\project-overview.md`
 - Modify: `C:\Users\DantePagani\llm-memory\wiki\projects\fantabrain-llm\architecture\data-model.md`
 
-- [ ] **Step 1: Update project memory**
+- [x] **Step 1: Update project memory**
 
 Add a concise note that Dataset v0 and Pagella v0 exist in:
 
@@ -570,7 +570,7 @@ benchmarks/pagella_v0.jsonl
 
 Include the exact final counts and the latest commit hashes.
 
-- [ ] **Step 2: Run memory secret scan**
+- [x] **Step 2: Run memory secret scan**
 
 Run from `C:\Users\DantePagani\llm-memory`:
 
@@ -580,7 +580,7 @@ Select-String -Path "wiki\projects\fantabrain-llm\**\*" -Pattern "API_KEY|SECRET
 
 Expected: no actual secret values.
 
-- [ ] **Step 3: Report completion**
+- [x] **Step 3: Report completion**
 
 Final response should include:
 
