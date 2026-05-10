@@ -96,6 +96,40 @@ python scripts/run_eval.py `
 
 La pagella crea un report Markdown con prompt, risposta attesa e checklist di qualita.
 
+## Baseline predictions
+
+Smoke locale senza modello reale:
+
+```powershell
+python scripts/generate_predictions.py `
+  --provider echo `
+  --model echo-baseline `
+  --eval benchmarks/pagella_v0.jsonl `
+  --run-name echo-pagella-v0-smoke
+```
+
+Baseline su GPU con Transformers:
+
+```bash
+python scripts/generate_predictions.py \
+  --provider transformers \
+  --model meta-llama/Llama-3.1-8B-Instruct \
+  --eval benchmarks/pagella_v0.jsonl \
+  --run-name base-llama31-pagella-v0
+```
+
+Baseline su endpoint OpenAI-compatible:
+
+```bash
+python scripts/generate_predictions.py \
+  --provider openai-compatible \
+  --model meta-llama/Llama-3.1-8B-Instruct \
+  --eval benchmarks/pagella_v0.jsonl \
+  --run-name base-api-pagella-v0
+```
+
+Gli output finiscono in `reports/runs/<run-name>/` come `predictions.jsonl`, `comparison.md` e `summary.json`.
+
 ## Slang
 
 - `palestra`: questo repo e il workflow training.
