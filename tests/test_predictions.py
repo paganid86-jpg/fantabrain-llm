@@ -6,7 +6,6 @@ from pathlib import Path
 from fantabrain_llm.dataset import load_examples
 from fantabrain_llm.predictions import Prediction, build_predictions, write_prediction_run
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -53,6 +52,7 @@ def test_write_prediction_run_creates_jsonl_markdown_and_summary(tmp_path: Path)
         run_name="echo-smoke",
         eval_path="benchmarks/pagella_v0.jsonl",
         output_root=tmp_path,
+        metadata={"adapter": None, "decoding": {"temperature": 0.3}},
     )
 
     predictions_path = output_dir / "predictions.jsonl"
@@ -77,3 +77,5 @@ def test_write_prediction_run_creates_jsonl_markdown_and_summary(tmp_path: Path)
     assert summary["examples"] == 1
     assert summary["provider"] == "echo"
     assert summary["model"] == "echo-baseline"
+    assert summary["adapter"] is None
+    assert summary["decoding"]["temperature"] == 0.3

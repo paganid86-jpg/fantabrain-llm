@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterable
 
 from fantabrain_llm.schema import TrainingExample
 
@@ -120,6 +120,7 @@ def write_prediction_run(
     run_name: str,
     eval_path: str,
     output_root: str | Path = "reports/runs",
+    metadata: dict[str, object] | None = None,
 ) -> Path:
     if not predictions:
         raise PredictionError("prediction run must contain at least one prediction")
@@ -139,18 +140,16 @@ def write_prediction_run(
         render_comparison_markdown(predictions, run_name),
         encoding="utf-8",
     )
-    summary_path.write_text(
-        json.dumps(
-            {
-                "run_name": run_name,
-                "eval_path": eval_path,
-                "examples": len(predictions),
-                "provider": predictions[0].provider,
-                "model": predictions[0].model,
-                "generated_at": datetime.now(UTC).isoformat(),
-            },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
+    summary: dict[str, object] = {
+        "run_name": run_name,
+        "eval_path": eval_path,
+        "examples": len(predictions),
+        "provider": predictions[0].provider,
+        "model": predictions[0].model,
+        "generated_at": datetime.now(UTC).isoformat(),
+    }
+    if metadata:
+        summary.update(metadata)
+
+    summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     return output_dir

@@ -44,10 +44,22 @@ class TransformersChatClient(ChatClient):
         model: str,
         max_new_tokens: int = 512,
         temperature: float = 0.2,
+        top_p: float = 1.0,
+        repetition_penalty: float = 1.0,
+        no_repeat_ngram_size: int = 0,
+        adapter: str | None = None,
+        load_in_4bit: bool = False,
+        torch_dtype: str = "bfloat16",
     ) -> None:
         super().__init__(model=model, provider="transformers")
         self.max_new_tokens = max_new_tokens
         self.temperature = temperature
+        self.top_p = top_p
+        self.repetition_penalty = repetition_penalty
+        self.no_repeat_ngram_size = no_repeat_ngram_size
+        self.adapter = adapter
+        self.load_in_4bit = load_in_4bit
+        self.torch_dtype = torch_dtype
         self._pipeline: Any | None = None
 
     def generate(self, messages: list[ChatMessage], mode: str, task: str) -> str:
@@ -55,27 +67,70 @@ class TransformersChatClient(ChatClient):
         if self._pipeline is None:
             try:
                 import torch
-                from transformers import pipeline
+                from transformers import (
+                    AutoModelForCausalLM,
+                    AutoTokenizer,
+                    BitsAndBytesConfig,
+                    pipeline,
+                )
             except ModuleNotFoundError as exc:
                 raise InferenceError(
                     "Transformers provider requires training dependencies. "
                     'Install with `python -m pip install -e ".[train]"` on a GPU runtime.'
                 ) from exc
 
+            dtype = getattr(torch, self.torch_dtype, None)
+            if dtype is None:
+                raise InferenceError(f"Unknown torch dtype: {self.torch_dtype}")
+
+            model_kwargs: dict[str, Any] = {
+                "torch_dtype": dtype,
+                "device_map": "auto",
+            }
+            if self.load_in_4bit:
+                model_kwargs["quantization_config"] = BitsAndBytesConfig(
+                    load_in_4bit=True,
+                    bnb_4bit_quant_type="nf4",
+                    bnb_4bit_compute_dtype=dtype,
+                    bnb_4bit_use_double_quant=True,
+                )
+
+            token = os.getenv("HF_TOKEN") or None
+            tokenizer = AutoTokenizer.from_pretrained(self.model, token=token)
+            model = AutoModelForCausalLM.from_pretrained(self.model, token=token, **model_kwargs)
+            if self.adapter:
+                try:
+                    from peft import PeftModel
+                except ModuleNotFoundError as exc:
+                    raise InferenceError(
+                        "Loading a LoRA adapter requires peft. "
+                        'Install with `python -m pip install -e ".[train]"`.'
+                    ) from exc
+                model = PeftModel.from_pretrained(model, self.adapter)
+
             self._pipeline = pipeline(
                 "text-generation",
-                model=self.model,
-                torch_dtype=getattr(torch, "bfloat16", None),
-                device_map="auto",
+                model=model,
+                tokenizer=tokenizer,
             )
 
         payload = [message.to_dict() for message in messages]
+        generation_kwargs: dict[str, Any] = {
+            "max_new_tokens": self.max_new_tokens,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "repetition_penalty": self.repetition_penalty,
+            "no_repeat_ngram_size": self.no_repeat_ngram_size,
+            "do_sample": self.temperature > 0,
+            "return_full_text": False,
+        }
+        eos_token_id = getattr(self._pipeline.tokenizer, "eos_token_id", None)
+        if eos_token_id is not None:
+            generation_kwargs["pad_token_id"] = eos_token_id
+
         result = self._pipeline(
             payload,
-            max_new_tokens=self.max_new_tokens,
-            temperature=self.temperature,
-            do_sample=self.temperature > 0,
-            return_full_text=False,
+            **generation_kwargs,
         )
         return _extract_transformers_text(result)
 
@@ -128,7 +183,9 @@ class OpenAICompatibleChatClient(ChatClient):
         try:
             return str(payload["choices"][0]["message"]["content"]).strip()
         except (KeyError, IndexError, TypeError) as exc:
-            raise InferenceError("OpenAI-compatible response did not contain choices[0].message.content") from exc
+            raise InferenceError(
+                "OpenAI-compatible response did not contain choices[0].message.content"
+            ) from exc
 
 
 def make_chat_client(
@@ -136,6 +193,12 @@ def make_chat_client(
     model: str,
     max_tokens: int = 512,
     temperature: float = 0.2,
+    top_p: float = 1.0,
+    repetition_penalty: float = 1.0,
+    no_repeat_ngram_size: int = 0,
+    adapter: str | None = None,
+    load_in_4bit: bool = False,
+    torch_dtype: str = "bfloat16",
 ) -> ChatClient:
     normalized = provider.strip().lower()
     if normalized == "echo":
@@ -145,6 +208,12 @@ def make_chat_client(
             model=model,
             max_new_tokens=max_tokens,
             temperature=temperature,
+            top_p=top_p,
+            repetition_penalty=repetition_penalty,
+            no_repeat_ngram_size=no_repeat_ngram_size,
+            adapter=adapter,
+            load_in_4bit=load_in_4bit,
+            torch_dtype=torch_dtype,
         )
     if normalized == "openai-compatible":
         return OpenAICompatibleChatClient(

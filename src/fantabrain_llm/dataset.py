@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import json
 import random
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
-from fantabrain_llm.schema import TrainingExample, ValidationError
+from fantabrain_llm.schema import ChatMessage, TrainingExample, ValidationError
 
 
 class DatasetError(ValueError):
@@ -82,6 +82,11 @@ def to_sft_record(example: TrainingExample) -> dict[str, object]:
         "tags": example.tags,
         "messages": [message.to_dict() for message in example.messages],
     }
+
+
+def to_generation_messages(example: TrainingExample) -> list[ChatMessage]:
+    """Return prompt messages for inference, excluding the gold assistant answer."""
+    return example.messages[:-1]
 
 
 def write_jsonl(path: str | Path, records: Iterable[dict[str, object]]) -> int:
