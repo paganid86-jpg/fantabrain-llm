@@ -78,6 +78,16 @@ python scripts/train_lora.py --config configs/sft/llama31-8b-qlora.yaml
 
 Il primo target e `meta-llama/Llama-3.1-8B-Instruct` con QLoRA.
 
+Forgia Qwen v0 su Colab T4:
+
+```bash
+python -m pip install -e ".[train]"
+python -m pip install -U "bitsandbytes>=0.46.1"
+python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v0.yaml
+```
+
+Il runbook operativo e `docs/runbooks/qwen25-lora-v0.md`.
+
 ## Pagella manuale
 
 ```powershell
@@ -116,6 +126,24 @@ python scripts/generate_predictions.py \
   --model meta-llama/Llama-3.1-8B-Instruct \
   --eval benchmarks/pagella_v0.jsonl \
   --run-name base-llama31-pagella-v0
+```
+
+Pagella con adapter Qwen v0:
+
+```bash
+python scripts/generate_predictions.py \
+  --provider transformers \
+  --model Qwen/Qwen2.5-3B-Instruct \
+  --adapter models/adapters/qwen25-3b-fantabrain-sft-v0 \
+  --eval benchmarks/pagella_v0.jsonl \
+  --run-name qwen25-3b-fantabrain-sft-v0-pagella-v0 \
+  --load-in-4bit \
+  --torch-dtype float16 \
+  --max-tokens 350 \
+  --temperature 0.3 \
+  --top-p 0.9 \
+  --repetition-penalty 1.15 \
+  --no-repeat-ngram-size 4
 ```
 
 Baseline su endpoint OpenAI-compatible:
