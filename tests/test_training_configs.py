@@ -21,3 +21,18 @@ def test_qwen25_lora_v0_config_trains_on_dataset_not_pagella() -> None:
     assert config["training"]["num_train_epochs"] == 3
     assert config["model"]["load_in_4bit"] is True
     assert config["model"]["torch_dtype"] == "float16"
+
+
+def test_qwen25_lora_v1_config_points_to_dataset_v1() -> None:
+    config_path = ROOT / "configs" / "sft" / "qwen25-3b-qlora-v1.yaml"
+
+    with config_path.open("r", encoding="utf-8") as handle:
+        config = yaml.safe_load(handle)
+
+    assert config["model"]["base_model"] == "Qwen/Qwen2.5-3B-Instruct"
+    assert config["data"]["train_path"] == "datasets/v1/train.jsonl"
+    assert config["data"].get("eval_path") in (None, "")
+    assert "pagella" not in config["data"]["train_path"]
+    assert config["training"]["output_dir"] == "models/adapters/qwen25-3b-fantabrain-sft-v1"
+    assert config["training"]["num_train_epochs"] == 2
+    assert config["model"]["load_in_4bit"] is True

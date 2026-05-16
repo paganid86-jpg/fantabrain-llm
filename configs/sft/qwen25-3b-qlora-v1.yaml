@@ -1,0 +1,46 @@
+project:
+  name: fantabrain-llm
+  run_name: qwen25-3b-fantabrain-sft-v1
+
+data:
+  train_path: datasets/v1/train.jsonl
+  eval_path:
+
+model:
+  base_model: Qwen/Qwen2.5-3B-Instruct
+  trust_remote_code: false
+  load_in_4bit: true
+  torch_dtype: float16
+  device_map: auto
+  bnb_4bit_quant_type: nf4
+  use_nested_quant: true
+
+training:
+  output_dir: models/adapters/qwen25-3b-fantabrain-sft-v1
+  max_length: 2048
+  num_train_epochs: 2
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 0.0002
+  warmup_ratio: 0.03
+  logging_steps: 5
+  save_steps: 50
+  eval_steps: 50
+  eval_strategy: "no"
+  packing: false
+  assistant_only_loss: false
+  report_to: none
+  seed: 42
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj

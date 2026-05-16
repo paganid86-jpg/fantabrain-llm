@@ -1,0 +1,110 @@
+version: v1
+status: draft
+purpose: >
+  Dataset v1 expands Dataset v0 after the first Qwen LoRA run. It targets
+  Mantra role-code mastery, Classic parity, grounded refusals, and shorter
+  decision-first coach answers.
+
+base_dataset: datasets/v0/train.jsonl
+train_path: datasets/v1/train.jsonl
+blind_eval_path: benchmarks/pagella_v0.jsonl
+
+target_examples: 320
+balance:
+  by_mode:
+    mantra: 160
+    classic: 160
+  by_task_mode:
+    lineup_advice:
+      mantra: 32
+      classic: 32
+    auction_advice:
+      mantra: 32
+      classic: 32
+    trade_advice:
+      mantra: 32
+      classic: 32
+    rules_explanation:
+      mantra: 24
+      classic: 24
+    risk_management:
+      mantra: 24
+      classic: 24
+    refusal_grounding:
+      mantra: 16
+      classic: 16
+
+p1_focus:
+  mantra_role_codes:
+    target_examples: 120
+    codes:
+      - E
+      - M
+      - T
+      - W
+      - Pc
+      - Dc
+      - A
+    rule: >
+      Mantra examples must use role codes literally and explain them through
+      slot, module, and coverage consequences. Never let codes become English
+      acronyms or generic labels.
+  classic_specificity:
+    target_examples: 120
+    vocabulary:
+      - porta
+      - difesa
+      - centrocampo
+      - attacco
+      - modificatore
+      - voto
+      - bonus
+      - malus
+    rule: >
+      Classic examples must be as concrete as Mantra examples, but without
+      pretending Mantra role constraints exist.
+  core_vocab:
+    target_examples: 100
+    vocabulary:
+      - slot
+      - incastri
+      - modulo
+      - copertura
+      - ballottaggio
+      - modificatore
+      - voto
+      - malus
+      - bonus
+      - rigorista
+  refusal_grounding:
+    target_examples: 50
+    pattern: "rifiuto -> criterio -> dati da fornire"
+  short_binary_decisions:
+    target_examples: 50
+    pattern: "Sceglierei/Eviterei/Preferirei -> condizione -> dato mancante"
+
+answer_contract:
+  max_words: 115
+  required_decision_markers:
+    - Sceglierei
+    - Eviterei
+    - Preferirei
+  required_condition_markers:
+    - solo se
+    - a meno che
+    - se invece
+  missing_context_markers:
+    - Mi mancano
+    - Non posso
+    - Per decidere bene
+
+quality_gates:
+  min_quality_score: 5
+  no_pagella_training: true
+  forbid_eval_prompt_leakage: true
+  forbid_real_player_names: true
+  forbid_specific_live_facts: true
+  forbid_invented_percentages: true
+  forbid_specific_scores_or_votes: true
+  forbid_fake_rules: true
+  keep_mantra_classic_same_level: true

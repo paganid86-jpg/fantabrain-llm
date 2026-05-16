@@ -88,6 +88,14 @@ python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v0.yaml
 
 Il runbook operativo e `docs/runbooks/qwen25-lora-v0.md`.
 
+Forgia Qwen v1, solo dopo aver completato `datasets/v1/train.jsonl`:
+
+```bash
+python -m pip install -e ".[train]"
+python -m pip install -U "bitsandbytes>=0.46.1"
+python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v1.yaml
+```
+
 ## Pagella manuale
 
 ```powershell
@@ -157,6 +165,33 @@ python scripts/generate_predictions.py \
 ```
 
 Gli output finiscono in `reports/runs/<run-name>/` come `predictions.jsonl`, `comparison.md` e `summary.json`.
+
+## P1 Scoring
+
+Per trasformare una pagella generata in metriche aggregate:
+
+```powershell
+python scripts/create_scores_template.py `
+  --predictions reports/runs/<run-name>/predictions.jsonl
+```
+
+Compila `scores.template.csv`, salvalo come `scores.csv`, poi lancia:
+
+```powershell
+python scripts/score_predictions.py `
+  --predictions reports/runs/<run-name>/predictions.jsonl `
+  --scores reports/runs/<run-name>/scores.csv
+```
+
+Il CSV deve usare queste colonne:
+
+```csv
+case,mode,tactical,grounded,clarity,tone,hallucination_free,notes
+```
+
+`hallucination_free` e binario: `1` se la risposta non inventa dati/regole/nomi, `0` se allucina. Quando vale `0`, il punteggio effettivo del case viene plafonato a `1.0`.
+
+Dataset v1 e descritto in `datasets/v1/manifest.yaml`.
 
 ## Slang
 
