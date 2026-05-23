@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import inspect
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -51,6 +52,13 @@ def build_model_init_kwargs(model_config: dict[str, Any]) -> dict[str, Any]:
         "device_map": model_config.get("device_map", "auto"),
         "trust_remote_code": bool(model_config.get("trust_remote_code", False)),
     }
+
+    if "low_cpu_mem_usage" in model_config:
+        kwargs["low_cpu_mem_usage"] = bool(model_config["low_cpu_mem_usage"])
+
+    token = os.getenv("HF_TOKEN")
+    if token:
+        kwargs["token"] = token
 
     if model_config.get("load_in_4bit", True):
         kwargs["quantization_config"] = BitsAndBytesConfig(
@@ -112,6 +120,16 @@ def main() -> int:
         "seed": training_config.get("seed", 42),
         "model_init_kwargs": model_init_kwargs,
     }
+
+    for optional_key in (
+        "bf16",
+        "fp16",
+        "gradient_checkpointing",
+        "max_grad_norm",
+        "optim",
+    ):
+        if optional_key in training_config:
+            sft_values[optional_key] = training_config[optional_key]
 
     if "eval_strategy" not in inspect.signature(SFTConfig).parameters:
         sft_values["evaluation_strategy"] = sft_values.pop("eval_strategy")
