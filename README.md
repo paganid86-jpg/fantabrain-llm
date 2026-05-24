@@ -96,6 +96,16 @@ python -m pip install -U "bitsandbytes>=0.46.1"
 python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v1.yaml
 ```
 
+Forgia Qwen v2, solo dopo aver completato `datasets/v2/train.jsonl`:
+
+```bash
+python -m pip install -e ".[train]"
+python -m pip install -U "bitsandbytes>=0.46.1"
+python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v2.yaml
+```
+
+Il runbook operativo e `docs/runbooks/qwen25-lora-v2.md`.
+
 ## Pagella manuale
 
 ```powershell
@@ -154,6 +164,24 @@ python scripts/generate_predictions.py \
   --no-repeat-ngram-size 4
 ```
 
+Pagella con adapter Qwen v2:
+
+```bash
+python scripts/generate_predictions.py \
+  --provider transformers \
+  --model Qwen/Qwen2.5-3B-Instruct \
+  --adapter models/adapters/qwen25-3b-fantabrain-sft-v2 \
+  --eval benchmarks/pagella_v0.jsonl \
+  --run-name qwen25-3b-fantabrain-sft-v2-pagella-v0 \
+  --load-in-4bit \
+  --torch-dtype float16 \
+  --max-tokens 350 \
+  --temperature 0.3 \
+  --top-p 0.9 \
+  --repetition-penalty 1.15 \
+  --no-repeat-ngram-size 4
+```
+
 Baseline su endpoint OpenAI-compatible:
 
 ```bash
@@ -192,6 +220,7 @@ case,mode,tactical,grounded,clarity,tone,hallucination_free,notes
 `hallucination_free` e binario: `1` se la risposta non inventa dati/regole/nomi, `0` se allucina. Quando vale `0`, il punteggio effettivo del case viene plafonato a `1.0`.
 
 Dataset v1 e descritto in `datasets/v1/manifest.yaml`.
+Dataset v2 e descritto in `datasets/v2/manifest.yaml` e nel runbook `docs/runbooks/qwen25-lora-v2.md`.
 
 ## Slang
 
