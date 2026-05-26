@@ -55,3 +55,22 @@ def test_qwen25_lora_v2_config_points_to_dataset_v2() -> None:
     assert config["model"]["low_cpu_mem_usage"] is True
     assert config["training"]["bf16"] is False
     assert config["training"]["fp16"] is False
+
+
+def test_qwen25_lora_v3_config_points_to_dataset_v3() -> None:
+    config_path = ROOT / "configs" / "sft" / "qwen25-3b-qlora-v3.yaml"
+
+    with config_path.open("r", encoding="utf-8") as handle:
+        config = yaml.safe_load(handle)
+
+    assert config["model"]["base_model"] == "Qwen/Qwen2.5-3B-Instruct"
+    assert config["data"]["train_path"] == "datasets/v3/train.jsonl"
+    assert config["data"].get("eval_path") in (None, "")
+    assert "pagella" not in config["data"]["train_path"]
+    assert config["training"]["output_dir"] == "models/adapters/qwen25-3b-fantabrain-sft-v3"
+    assert config["training"]["num_train_epochs"] == 2
+    assert config["model"]["load_in_4bit"] is True
+    assert config["model"]["torch_dtype"] == "float16"
+    assert config["model"]["low_cpu_mem_usage"] is True
+    assert config["training"]["bf16"] is False
+    assert config["training"]["fp16"] is False
