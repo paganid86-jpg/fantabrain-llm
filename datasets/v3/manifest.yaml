@@ -1,0 +1,107 @@
+version: v3
+status: draft
+purpose: >
+  Dataset v3 adds a P3 cleanup set on top of Dataset v2. It focuses on
+  anti-error behavior observed in the Qwen v2 pagella: no invented Mantra
+  modules, no Classic/Mantra vocabulary leakage, cleaner Classic modificatore
+  explanations, refusal answers that stop cleanly, and short decision-first
+  Italian without malformed words.
+
+base_dataset: datasets/v2/train.jsonl
+train_path: datasets/v3/train.jsonl
+blind_eval_path: benchmarks/pagella_v0.jsonl
+
+p3_examples: 40
+p3_balance:
+  by_mode:
+    mantra: 20
+    classic: 20
+
+repair_targets:
+  primary_cases:
+    - 2
+    - 5
+    - 6
+    - 7
+    - 9
+    - 10
+    - 19
+    - 25
+    - 27
+    - 28
+    - 29
+    - 32
+    - 34
+    - 37
+  secondary_cases:
+    - 15
+    - 31
+    - 36
+    - 40
+
+p3_blocks:
+  - name: mantra_no_module_invention
+    path: datasets/v3/drafts/p3_block_001_mantra_no_module_invention.jsonl
+    examples: 8
+    mode_split:
+      mantra: 8
+      classic: 0
+    focus_tag: mantra_no_module_invention
+    target_cases: [2, 3, 31, 32]
+  - name: classic_modificatore_clean
+    path: datasets/v3/drafts/p3_block_002_classic_modificatore_clean.jsonl
+    examples: 10
+    mode_split:
+      mantra: 0
+      classic: 10
+    focus_tag: classic_modificatore_clean
+    target_cases: [6, 13, 15, 28, 29]
+  - name: refusal_stop_clean
+    path: datasets/v3/drafts/p3_block_003_refusal_stop_clean.jsonl
+    examples: 8
+    mode_split:
+      mantra: 4
+      classic: 4
+    focus_tag: refusal_stop_clean
+    target_cases: [37, 38, 39, 40]
+  - name: mantra_roles_no_cross_mode
+    path: datasets/v3/drafts/p3_block_004_mantra_roles_no_cross_mode.jsonl
+    examples: 8
+    mode_split:
+      mantra: 8
+      classic: 0
+    focus_tag: mantra_roles_no_cross_mode
+    target_cases: [9, 10, 19, 20, 25, 27]
+  - name: italiano_cleanup_decision_first
+    path: datasets/v3/drafts/p3_block_005_italiano_cleanup_decision_first.jsonl
+    examples: 6
+    mode_split:
+      mantra: 0
+      classic: 6
+    focus_tag: italiano_cleanup_decision_first
+    target_cases: [5, 7, 16, 22, 30, 36]
+
+answer_contract:
+  max_words: 95
+  required_opening_markers:
+    - Sceglierei
+    - Preferirei
+    - Eviterei
+    - Non posso
+  max_missing_context_sentences: 1
+  max_conditional_branches: 1
+
+quality_gates:
+  min_quality_score: 5
+  source: v3_manual
+  no_pagella_training: true
+  forbid_eval_prompt_leakage: true
+  forbid_real_player_names: true
+  forbid_specific_live_facts: true
+  forbid_invented_percentages: true
+  forbid_specific_scores_or_votes: true
+  forbid_fake_rules: true
+  forbid_invented_modules: true
+  forbid_cross_mode_vocabulary: true
+  forbid_broken_generated_words: true
+  keep_mantra_classic_same_level: true

@@ -180,18 +180,18 @@ repair_targets:
 p3_blocks:
   - name: mantra_no_module_invention
     path: datasets/v3/drafts/p3_block_001_mantra_no_module_invention.jsonl
-    examples: 10
+    examples: 8
     mode_split:
-      mantra: 10
+      mantra: 8
       classic: 0
     focus_tag: mantra_no_module_invention
     target_cases: [2, 3, 31, 32]
   - name: classic_modificatore_clean
     path: datasets/v3/drafts/p3_block_002_classic_modificatore_clean.jsonl
-    examples: 8
+    examples: 10
     mode_split:
       mantra: 0
-      classic: 8
+      classic: 10
     focus_tag: classic_modificatore_clean
     target_cases: [6, 13, 15, 28, 29]
   - name: refusal_stop_clean
@@ -214,8 +214,8 @@ p3_blocks:
     path: datasets/v3/drafts/p3_block_005_italiano_cleanup_decision_first.jsonl
     examples: 6
     mode_split:
-      mantra: 3
-      classic: 3
+      mantra: 0
+      classic: 6
     focus_tag: italiano_cleanup_decision_first
     target_cases: [5, 7, 16, 22, 30, 36]
 
@@ -1186,7 +1186,7 @@ If the result is not `280`, stop and restore `fantabrain-dataset-v2-280.zip`.
 
 - [ ] **Step 2: Author Block 001**
 
-Create `datasets/v3/drafts/p3_block_001_mantra_no_module_invention.jsonl` with 10 Mantra examples.
+Create `datasets/v3/drafts/p3_block_001_mantra_no_module_invention.jsonl` with 8 Mantra examples.
 
 Every row must include:
 
@@ -1218,7 +1218,7 @@ This is acceptable after Block 001. If the error mentions Block 001 counts, mode
 
 - [ ] **Step 3: Author Block 002**
 
-Create `datasets/v3/drafts/p3_block_002_classic_modificatore_clean.jsonl` with 8 Classic examples.
+Create `datasets/v3/drafts/p3_block_002_classic_modificatore_clean.jsonl` with 10 Classic examples.
 
 Every row must include:
 
@@ -1285,10 +1285,7 @@ Assembly error: Dataset not found: datasets/v3/drafts/p3_block_005_italiano_clea
 
 - [ ] **Step 6: Author Block 005**
 
-Create `datasets/v3/drafts/p3_block_005_italiano_cleanup_decision_first.jsonl` with 6 examples:
-
-- 3 Mantra
-- 3 Classic
+Create `datasets/v3/drafts/p3_block_005_italiano_cleanup_decision_first.jsonl` with 6 Classic examples.
 - focus tag: `italiano_cleanup_decision_first`
 
 Every assistant answer must be:

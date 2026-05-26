@@ -118,7 +118,7 @@ If `datasets/v2/train.jsonl` is not present locally or in Colab, the notebook fl
 
 File: `datasets/v3/drafts/p3_block_001_mantra_no_module_invention.jsonl`
 
-Examples: 10 Mantra
+Examples: 8 Mantra
 
 Primary targets: cases 2, 3, 31, 32
 
@@ -146,7 +146,7 @@ Sceglierei tra i moduli che mi hai dato, non ne aggiungerei un terzo. X ha senso
 
 File: `datasets/v3/drafts/p3_block_002_classic_modificatore_clean.jsonl`
 
-Examples: 8 Classic
+Examples: 10 Classic
 
 Primary targets: cases 6, 13, 15, 28, 29
 
@@ -234,12 +234,7 @@ Preferirei X perche protegge [role code] nei moduli che vuoi usare. Y porta piu 
 
 File: `datasets/v3/drafts/p3_block_005_italiano_cleanup_decision_first.jsonl`
 
-Examples: 6 mixed
-
-Mode split:
-
-- Mantra: 3
-- Classic: 3
+Examples: 6 Classic
 
 Primary targets: all cases with acceptable direction but broken delivery
 
