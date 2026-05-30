@@ -5,9 +5,14 @@ from pathlib import Path
 
 import pytest
 
-from fantabrain_llm.dataset import DatasetError, load_examples, split_examples, to_sft_record
+from fantabrain_llm.dataset import (
+    DatasetError,
+    load_examples,
+    split_examples,
+    to_generation_messages,
+    to_sft_record,
+)
 from fantabrain_llm.schema import TrainingExample
-
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -72,4 +77,25 @@ def test_sft_record_preserves_chat_messages() -> None:
         {"role": "system", "content": "System"},
         {"role": "user", "content": "Question"},
         {"role": "assistant", "content": "Answer"},
+    ]
+
+
+def test_generation_messages_drop_gold_assistant_answer() -> None:
+    example = TrainingExample.from_dict(
+        {
+            "mode": "classic",
+            "task": "lineup_advice",
+            "messages": [
+                {"role": "system", "content": "System"},
+                {"role": "user", "content": "Question"},
+                {"role": "assistant", "content": "Gold answer"},
+            ],
+        }
+    )
+
+    messages = to_generation_messages(example)
+
+    assert [message.to_dict() for message in messages] == [
+        {"role": "system", "content": "System"},
+        {"role": "user", "content": "Question"},
     ]

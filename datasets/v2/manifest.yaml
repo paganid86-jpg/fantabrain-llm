@@ -1,0 +1,103 @@
+version: v2
+status: draft
+purpose: >
+  Dataset v2 adds a targeted P2 repair set on top of Dataset v1. It focuses on
+  the exact behavioral failures observed in the Qwen v1 pagella: Classic
+  modificatore reasoning, Mantra role-code corruption, risk/varianza handling,
+  grounded refusals, and cleaner decision-first Italian.
+
+base_dataset: datasets/v1/train.jsonl
+train_path: datasets/v2/train.jsonl
+blind_eval_path: benchmarks/pagella_v0.jsonl
+
+p2_examples: 80
+p2_balance:
+  by_mode:
+    mantra: 40
+    classic: 40
+
+repair_targets:
+  primary_cases:
+    - 2
+    - 3
+    - 6
+    - 9
+    - 20
+    - 27
+    - 28
+    - 34
+    - 39
+  secondary_cases:
+    - 7
+    - 15
+    - 31
+    - 35
+    - 36
+
+p2_blocks:
+  - name: classic_modificatore
+    path: datasets/v2/drafts/p2_block_001_classic_modificatore.jsonl
+    examples: 20
+    mode_split:
+      mantra: 0
+      classic: 20
+    focus_tag: classic_modificatore
+    target_cases: [6, 13, 15, 28, 34]
+  - name: mantra_role_codes_guardrail
+    path: datasets/v2/drafts/p2_block_002_mantra_role_codes_guardrail.jsonl
+    examples: 20
+    mode_split:
+      mantra: 20
+      classic: 0
+    focus_tag: mantra_role_codes_guardrail
+    target_cases: [2, 3, 9, 20, 27]
+  - name: risk_varianza_decisioni
+    path: datasets/v2/drafts/p2_block_003_risk_varianza_decisioni.jsonl
+    examples: 16
+    mode_split:
+      mantra: 8
+      classic: 8
+    focus_tag: risk_varianza_decisioni
+    target_cases: [31, 34, 35, 36]
+  - name: refusal_grounded_clean
+    path: datasets/v2/drafts/p2_block_004_refusal_grounded_clean.jsonl
+    examples: 12
+    mode_split:
+      mantra: 6
+      classic: 6
+    focus_tag: refusal_grounded_clean
+    target_cases: [37, 38, 39, 40]
+  - name: italiano_asciutto_decision_first
+    path: datasets/v2/drafts/p2_block_005_italiano_asciutto_decision_first.jsonl
+    examples: 12
+    mode_split:
+      mantra: 6
+      classic: 6
+    focus_tag: italiano_asciutto_decision_first
+    target_cases: [5, 8, 10, 12, 14, 16, 21, 22, 23, 24, 25, 30, 32, 33]
+
+answer_contract:
+  max_words: 110
+  required_opening_markers:
+    - Sceglierei
+    - Preferirei
+    - Eviterei
+    - Non posso
+  required_condition_markers:
+    - solo se
+    - a meno che
+    - se invece
+  max_missing_context_sentences: 1
+
+quality_gates:
+  min_quality_score: 5
+  source: v2_manual
+  no_pagella_training: true
+  forbid_eval_prompt_leakage: true
+  forbid_real_player_names: true
+  forbid_specific_live_facts: true
+  forbid_invented_percentages: true
+  forbid_specific_scores_or_votes: true
+  forbid_fake_rules: true
+  forbid_role_code_corruption: true
+  keep_mantra_classic_same_level: true

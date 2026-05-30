@@ -78,6 +78,54 @@ python scripts/train_lora.py --config configs/sft/llama31-8b-qlora.yaml
 
 Il primo target e `meta-llama/Llama-3.1-8B-Instruct` con QLoRA.
 
+Forgia Qwen v0 su Colab T4:
+
+```bash
+python -m pip install -e ".[train]"
+python -m pip install -U "bitsandbytes>=0.46.1"
+python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v0.yaml
+```
+
+Il runbook operativo e `docs/runbooks/qwen25-lora-v0.md`.
+
+Forgia Qwen v1, solo dopo aver completato `datasets/v1/train.jsonl`:
+
+```bash
+python -m pip install -e ".[train]"
+python -m pip install -U "bitsandbytes>=0.46.1"
+python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v1.yaml
+```
+
+Forgia Qwen v2, solo dopo aver completato `datasets/v2/train.jsonl`:
+
+```bash
+python -m pip install -e ".[train]"
+python -m pip install -U "bitsandbytes>=0.46.1"
+python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v2.yaml
+```
+
+Il runbook operativo e `docs/runbooks/qwen25-lora-v2.md`.
+
+Forgia Qwen v3, solo dopo aver completato `datasets/v3/train.jsonl`:
+
+```bash
+python -m pip install -e ".[train]"
+python -m pip install -U "bitsandbytes>=0.46.1"
+python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v3.yaml
+```
+
+Il runbook operativo e `docs/runbooks/qwen25-lora-v3.md`.
+
+Forgia Qwen v4, solo dopo aver completato `datasets/v4/train.jsonl`:
+
+```bash
+python -m pip install -e ".[train]"
+python -m pip install -U "bitsandbytes>=0.46.1"
+python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v4.yaml
+```
+
+Il runbook operativo e `docs/runbooks/qwen25-lora-v4.md`.
+
 ## Pagella manuale
 
 ```powershell
@@ -118,6 +166,78 @@ python scripts/generate_predictions.py \
   --run-name base-llama31-pagella-v0
 ```
 
+Pagella con adapter Qwen v0:
+
+```bash
+python scripts/generate_predictions.py \
+  --provider transformers \
+  --model Qwen/Qwen2.5-3B-Instruct \
+  --adapter models/adapters/qwen25-3b-fantabrain-sft-v0 \
+  --eval benchmarks/pagella_v0.jsonl \
+  --run-name qwen25-3b-fantabrain-sft-v0-pagella-v0 \
+  --load-in-4bit \
+  --torch-dtype float16 \
+  --max-tokens 350 \
+  --temperature 0.3 \
+  --top-p 0.9 \
+  --repetition-penalty 1.15 \
+  --no-repeat-ngram-size 4
+```
+
+Pagella con adapter Qwen v2:
+
+```bash
+python scripts/generate_predictions.py \
+  --provider transformers \
+  --model Qwen/Qwen2.5-3B-Instruct \
+  --adapter models/adapters/qwen25-3b-fantabrain-sft-v2 \
+  --eval benchmarks/pagella_v0.jsonl \
+  --run-name qwen25-3b-fantabrain-sft-v2-pagella-v0 \
+  --load-in-4bit \
+  --torch-dtype float16 \
+  --max-tokens 350 \
+  --temperature 0.3 \
+  --top-p 0.9 \
+  --repetition-penalty 1.15 \
+  --no-repeat-ngram-size 4
+```
+
+Pagella con adapter Qwen v3:
+
+```bash
+python scripts/generate_predictions.py \
+  --provider transformers \
+  --model Qwen/Qwen2.5-3B-Instruct \
+  --adapter models/adapters/qwen25-3b-fantabrain-sft-v3 \
+  --eval benchmarks/pagella_v0.jsonl \
+  --run-name qwen25-3b-fantabrain-sft-v3-pagella-v0 \
+  --load-in-4bit \
+  --torch-dtype float16 \
+  --max-tokens 350 \
+  --temperature 0.3 \
+  --top-p 0.9 \
+  --repetition-penalty 1.15 \
+  --no-repeat-ngram-size 4
+```
+
+Pagella con adapter Qwen v4:
+
+```bash
+python scripts/generate_predictions.py \
+  --provider transformers \
+  --model Qwen/Qwen2.5-3B-Instruct \
+  --adapter models/adapters/qwen25-3b-fantabrain-sft-v4 \
+  --eval benchmarks/pagella_v0.jsonl \
+  --run-name qwen25-3b-fantabrain-sft-v4-pagella-v0 \
+  --load-in-4bit \
+  --torch-dtype float16 \
+  --max-tokens 350 \
+  --temperature 0.3 \
+  --top-p 0.9 \
+  --repetition-penalty 1.15 \
+  --no-repeat-ngram-size 4
+```
+
 Baseline su endpoint OpenAI-compatible:
 
 ```bash
@@ -129,6 +249,36 @@ python scripts/generate_predictions.py \
 ```
 
 Gli output finiscono in `reports/runs/<run-name>/` come `predictions.jsonl`, `comparison.md` e `summary.json`.
+
+## P1 Scoring
+
+Per trasformare una pagella generata in metriche aggregate:
+
+```powershell
+python scripts/create_scores_template.py `
+  --predictions reports/runs/<run-name>/predictions.jsonl
+```
+
+Compila `scores.template.csv`, salvalo come `scores.csv`, poi lancia:
+
+```powershell
+python scripts/score_predictions.py `
+  --predictions reports/runs/<run-name>/predictions.jsonl `
+  --scores reports/runs/<run-name>/scores.csv
+```
+
+Il CSV deve usare queste colonne:
+
+```csv
+case,mode,tactical,grounded,clarity,tone,hallucination_free,notes
+```
+
+`hallucination_free` e binario: `1` se la risposta non inventa dati/regole/nomi, `0` se allucina. Quando vale `0`, il punteggio effettivo del case viene plafonato a `1.0`.
+
+Dataset v1 e descritto in `datasets/v1/manifest.yaml`.
+Dataset v2 e descritto in `datasets/v2/manifest.yaml` e nel runbook `docs/runbooks/qwen25-lora-v2.md`.
+Dataset v3 e descritto in `datasets/v3/manifest.yaml` e nel runbook `docs/runbooks/qwen25-lora-v3.md`.
+Dataset v4 e descritto in `datasets/v4/manifest.yaml` e nel runbook `docs/runbooks/qwen25-lora-v4.md`.
 
 ## Slang
 

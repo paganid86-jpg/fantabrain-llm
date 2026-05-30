@@ -1,0 +1,110 @@
+version: v4
+status: draft
+purpose: >
+  Dataset v4 adds a small P3bis corrective set on top of Dataset v2.
+  It does not use Dataset v3 as input. The focus is strict cross-mode
+  cleanup, decision inversion repair, and refusal-stop behavior.
+
+base_dataset: datasets/v2/train.jsonl
+train_path: datasets/v4/train.jsonl
+blind_eval_path: benchmarks/pagella_v0.jsonl
+
+p3bis_examples: 20
+p3bis_balance:
+  by_mode:
+    mantra: 10
+    classic: 10
+
+repair_targets:
+  mantra_cases: [2, 3, 4, 10, 11, 20, 25, 27, 38]
+  classic_cases: [13, 15, 16, 21, 24, 28, 29, 30, 36, 40]
+  preserve_signals: [6, 9, 32, 34, 37]
+
+p3bis_blocks:
+  - name: mantra_anti_leak
+    path: datasets/v4/drafts/p3bis_block_001_mantra_anti_leak.jsonl
+    examples: 5
+    mode_split:
+      mantra: 5
+      classic: 0
+    focus_tag: mantra_anti_leak
+    target_cases: [2, 3, 10, 11, 25]
+  - name: classic_anti_leak
+    path: datasets/v4/drafts/p3bis_block_002_classic_anti_leak.jsonl
+    examples: 5
+    mode_split:
+      mantra: 0
+      classic: 5
+    focus_tag: classic_anti_leak
+    target_cases: [13, 15, 21, 28, 29]
+  - name: decision_inversion
+    path: datasets/v4/drafts/p3bis_block_003_decision_inversion.jsonl
+    examples: 6
+    mode_split:
+      mantra: 3
+      classic: 3
+    focus_tag: decision_inversion
+    target_cases: [4, 16, 20, 24, 30, 36]
+  - name: refusal_stop
+    path: datasets/v4/drafts/p3bis_block_004_refusal_stop.jsonl
+    examples: 4
+    mode_split:
+      mantra: 2
+      classic: 2
+    focus_tag: refusal_stop
+    target_cases: [38, 40]
+
+answer_contract:
+  min_words: 55
+  max_words: 90
+  required_opening_markers:
+    - Sceglierei
+    - Preferirei
+    - Eviterei
+    - Non posso
+  max_missing_context_sentences: 1
+  max_conditional_branches: 1
+
+quality_gates:
+  min_quality_score: 5
+  source: v4_manual
+  no_pagella_training: true
+  forbid_dataset_v3_as_base: true
+  forbid_eval_prompt_leakage: true
+  forbid_real_player_names: true
+  forbid_specific_live_facts: true
+  forbid_invented_percentages: true
+  forbid_specific_scores_or_votes: true
+  forbid_fake_rules: true
+  forbid_invented_modules: true
+  forbid_cross_mode_vocabulary: true
+  forbid_broken_generated_words: true
+  keep_mantra_classic_same_level: true
+
+mode_vocabulary_gates:
+  mantra_forbidden_terms:
+    - modificatore
+  classic_forbidden_terms:
+    - slot
+    - codice
+    - modulo
+    - moduli
+    - mantra
+    - pc
+    - dc
+    - ds
+    - dd
+  broken_terms:
+    - offENSIVO
+    - sicurata
+    - ruoloni
+    - mojibake
+    - tre quartieri
+
+promotion_gates:
+  effective_average_gt: 2.69
+  hallucination_free_gt: 26
+  raw_average_min: 3.10
+  case_2_no_invented_modules: true
+  mantra_forbid_modificatore: true
+  classic_forbid_mantra_vocabulary: true
