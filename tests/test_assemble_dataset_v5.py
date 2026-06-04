@@ -154,8 +154,17 @@ def test_assemble_dataset_appends_valid_p4_rows(tmp_path: Path) -> None:
     assert sum(1 for _ in output_path.open("r", encoding="utf-8")) == 4
 
 
-def test_assemble_dataset_rejects_dataset_v3_or_v4_base(tmp_path: Path) -> None:
-    base_path = tmp_path / "datasets" / "v3" / "train.jsonl"
+@pytest.mark.parametrize(
+    ("version", "expected_message"),
+    [
+        ("v3", "must not use Dataset v3"),
+        ("v4", "must not use Dataset v4"),
+    ],
+)
+def test_assemble_dataset_rejects_dataset_v3_or_v4_base(
+    tmp_path: Path, version: str, expected_message: str
+) -> None:
+    base_path = tmp_path / "datasets" / version / "train.jsonl"
     block_path = tmp_path / "drafts" / "block.jsonl"
     manifest_path = tmp_path / "manifest.yaml"
     output_path = tmp_path / "train.jsonl"
@@ -163,7 +172,7 @@ def test_assemble_dataset_rejects_dataset_v3_or_v4_base(tmp_path: Path) -> None:
     write_jsonl(block_path, [valid_mantra(), valid_classic()])
     write_manifest(manifest_path, block_path)
 
-    with pytest.raises(AssemblyError, match="must not use Dataset v3"):
+    with pytest.raises(AssemblyError, match=expected_message):
         assemble_dataset(base_path=base_path, manifest_path=manifest_path, output_path=output_path)
 
 
