@@ -190,9 +190,11 @@ def count_modes(records: list[dict[str, object]], expected_modes: dict[str, int]
 
 def validate_base_path(base_path: Path, quality_gates: dict[str, object]) -> None:
     normalized_base = str(base_path).replace("\\", "/")
-    if bool(quality_gates.get("forbid_dataset_v3_as_base", False)) and "datasets/v3/" in normalized_base:
+    forbid_v3 = bool(quality_gates.get("forbid_dataset_v3_as_base", False))
+    forbid_v4 = bool(quality_gates.get("forbid_dataset_v4_as_base", False))
+    if forbid_v3 and "datasets/v3/" in normalized_base:
         raise AssemblyError("Dataset v5 must not use Dataset v3 as base")
-    if bool(quality_gates.get("forbid_dataset_v4_as_base", False)) and "datasets/v4/" in normalized_base:
+    if forbid_v4 and "datasets/v4/" in normalized_base:
         raise AssemblyError("Dataset v5 must not use Dataset v4 as base")
 
 
@@ -221,7 +223,9 @@ def assemble_dataset(base_path: Path, manifest_path: Path, output_path: Path) ->
 
         records = records_from_examples(block_path)
         if len(records) != expected_examples:
-            raise AssemblyError(f"{block_path}: expected {expected_examples} examples, got {len(records)}")
+            raise AssemblyError(
+                f"{block_path}: expected {expected_examples} examples, got {len(records)}"
+            )
 
         split = count_modes(records, expected_split)
         if split != expected_split:
@@ -256,7 +260,9 @@ def assemble_dataset(base_path: Path, manifest_path: Path, output_path: Path) ->
     expected_final_by_mode = manifest["final_balance"]["by_mode"]
     final_by_mode = count_modes(output_records, expected_final_by_mode)
     if final_by_mode != expected_final_by_mode:
-        raise AssemblyError(f"expected final mode split {expected_final_by_mode}, got {final_by_mode}")
+        raise AssemblyError(
+            f"expected final mode split {expected_final_by_mode}, got {final_by_mode}"
+        )
 
     write_jsonl(output_path, output_records)
 

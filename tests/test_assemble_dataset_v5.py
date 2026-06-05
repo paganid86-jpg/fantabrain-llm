@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+# ruff: noqa: E402,I001
+
 import json
 import sys
 from pathlib import Path
@@ -99,7 +101,11 @@ def valid_mantra(user: str = "P4 Mantra prompt?") -> dict[str, object]:
         task="lineup_advice",
         source="v5_manual",
         user=user,
-        assistant="Sceglierei il modulo gia coperto nei ruoli indicati. Se hai un dubbio tra talento e copertura, parto dalla stabilita dello slot raro e poi cerco bonus negli spazi flessibili. Mi manca la lista completa dei ruoli.",
+        assistant=(
+            "Sceglierei il modulo gia coperto nei ruoli indicati. Se hai un dubbio tra "
+            "talento e copertura, parto dalla stabilita dello slot raro e poi cerco bonus "
+            "negli spazi flessibili. Mi manca la lista completa dei ruoli."
+        ),
         tags=["v5", "train", "mantra", "lineup_advice", "test_focus"],
     )
 
@@ -110,7 +116,11 @@ def valid_classic(user: str = "P4 Classic prompt?") -> dict[str, object]:
         task="lineup_advice",
         source="v5_manual",
         user=user,
-        assistant="Sceglierei il reparto con piu titolari sicuri. Se il bonus atteso e simile, proteggo voto medio e panchina prima della scommessa. Mi mancano nomi e avversari, quindi tengo una linea prudente.",
+        assistant=(
+            "Sceglierei il reparto con piu titolari sicuri. Se il bonus atteso e simile, "
+            "proteggo voto medio e panchina prima della scommessa. Mi mancano nomi e "
+            "avversari, quindi tengo una linea prudente."
+        ),
         tags=["v5", "train", "classic", "lineup_advice", "test_focus"],
     )
 
@@ -145,7 +155,11 @@ def test_assemble_dataset_appends_valid_p4_rows(tmp_path: Path) -> None:
     write_jsonl(block_path, [valid_mantra(), valid_classic()])
     write_manifest(manifest_path, block_path)
 
-    summary = assemble_dataset(base_path=base_path, manifest_path=manifest_path, output_path=output_path)
+    summary = assemble_dataset(
+        base_path=base_path,
+        manifest_path=manifest_path,
+        output_path=output_path,
+    )
 
     assert summary == {
         "base_examples": 2,
@@ -184,7 +198,10 @@ def test_assemble_dataset_rejects_duplicate_base_prompt(tmp_path: Path) -> None:
     block_path = tmp_path / "drafts" / "block.jsonl"
     manifest_path = tmp_path / "manifest.yaml"
     output_path = tmp_path / "train.jsonl"
-    write_jsonl(base_path, [valid_mantra(user="Duplicate prompt?"), valid_classic(user="Base Classic?")])
+    write_jsonl(
+        base_path,
+        [valid_mantra(user="Duplicate prompt?"), valid_classic(user="Base Classic?")],
+    )
     write_jsonl(block_path, [valid_mantra(user="Duplicate prompt?"), valid_classic()])
     write_manifest(manifest_path, block_path)
 
@@ -199,7 +216,9 @@ def test_assemble_dataset_rejects_mantra_forbidden_terms(tmp_path: Path) -> None
     output_path = tmp_path / "train.jsonl"
     write_jsonl(base_path, [valid_mantra(user="Base Mantra?"), valid_classic(user="Base Classic?")])
     bad = valid_mantra()
-    bad["messages"][-1]["content"] = "Sceglierei questa strada perche il modificatore protegge il reparto."
+    bad["messages"][-1]["content"] = (
+        "Sceglierei questa strada perche il modificatore protegge il reparto."
+    )
     write_jsonl(block_path, [bad, valid_classic()])
     write_manifest(manifest_path, block_path)
 
@@ -207,16 +226,21 @@ def test_assemble_dataset_rejects_mantra_forbidden_terms(tmp_path: Path) -> None
         assemble_dataset(base_path=base_path, manifest_path=manifest_path, output_path=output_path)
 
 
-def test_assemble_dataset_rejects_classic_role_code_token_but_not_letters_inside_words(tmp_path: Path) -> None:
+def test_assemble_dataset_rejects_classic_role_code_token(tmp_path: Path) -> None:
     base_path = tmp_path / "base.jsonl"
     block_path = tmp_path / "drafts" / "block.jsonl"
     manifest_path = tmp_path / "manifest.yaml"
     output_path = tmp_path / "train.jsonl"
     write_jsonl(base_path, [valid_mantra(user="Base Mantra?"), valid_classic(user="Base Classic?")])
     clean = valid_classic()
-    clean["messages"][-1]["content"] = "Sceglierei il centrocampo stabile. Mi manca il calendario, ma in una rosa corta proteggo panchina e voto medio prima del bonus."
+    clean["messages"][-1]["content"] = (
+        "Sceglierei il centrocampo stabile. Mi manca il calendario, ma in una rosa corta "
+        "proteggo panchina e voto medio prima del bonus."
+    )
     leaking = valid_classic(user="Classic role leak?")
-    leaking["messages"][-1]["content"] = "Sceglierei il reparto sicuro, ma la W cambia il ragionamento."
+    leaking["messages"][-1]["content"] = (
+        "Sceglierei il reparto sicuro, ma la W cambia il ragionamento."
+    )
     write_jsonl(block_path, [valid_mantra(), clean])
     write_manifest(manifest_path, block_path)
     assemble_dataset(base_path=base_path, manifest_path=manifest_path, output_path=output_path)
@@ -233,7 +257,9 @@ def test_assemble_dataset_rejects_broken_terms(tmp_path: Path) -> None:
     output_path = tmp_path / "train.jsonl"
     write_jsonl(base_path, [valid_mantra(user="Base Mantra?"), valid_classic(user="Base Classic?")])
     bad = valid_classic()
-    bad["messages"][-1]["content"] = "Sceglierei la punteggianza migliore se il reparto resta coperto."
+    bad["messages"][-1]["content"] = (
+        "Sceglierei la punteggianza migliore se il reparto resta coperto."
+    )
     write_jsonl(block_path, [valid_mantra(), bad])
     write_manifest(manifest_path, block_path)
 
