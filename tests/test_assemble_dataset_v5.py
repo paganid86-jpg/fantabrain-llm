@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
 import yaml
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts.assemble_dataset_v5 import AssemblyError, assemble_dataset
 
