@@ -126,6 +126,21 @@ python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v4.yaml
 
 Il runbook operativo e `docs/runbooks/qwen25-lora-v4.md`.
 
+### Dataset v5 / P4 micro
+
+Dataset v5 e un micro add-on correttivo da 16 esempi sopra Dataset v2. Non usa Dataset v3 o Dataset v4 come base.
+
+```bash
+python scripts/assemble_dataset_v5.py \
+  --base datasets/v2/train.jsonl \
+  --manifest datasets/v5/manifest.yaml \
+  --output datasets/v5/train.jsonl
+
+python scripts/train_lora.py --config configs/sft/qwen25-3b-qlora-v5.yaml
+```
+
+Il runbook operativo e `docs/runbooks/qwen25-lora-v5.md`. Mantieni `qwen25-3b-fantabrain-sft-v2` come rollback finche v5 non batte le promotion gates.
+
 ## Pagella manuale
 
 ```powershell

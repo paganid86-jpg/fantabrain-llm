@@ -1,0 +1,129 @@
+version: v5
+status: draft
+purpose: >
+  Dataset v5 adds a 16-example P4 micro corrective set on top of Dataset v2.
+  It does not use Dataset v3 or Dataset v4 as input. The focus is lexical
+  leakage control, no invented modules, and clean decision-first Italian.
+
+base_dataset: datasets/v2/train.jsonl
+train_path: datasets/v5/train.jsonl
+blind_eval_path: benchmarks/pagella_v0.jsonl
+
+p4_examples: 16
+p4_balance:
+  by_mode:
+    mantra: 8
+    classic: 8
+
+final_balance:
+  by_mode:
+    mantra: 148
+    classic: 148
+
+repair_targets:
+  mantra_cases: [2, 3, 20, 31, 38]
+  classic_cases: [14, 28, 36, 39]
+  preserve_signals: [17, 19, 34, 37]
+
+p4_blocks:
+  - name: mantra_no_modificatore
+    path: datasets/v5/drafts/p4_block_001_mantra_no_modificatore.jsonl
+    examples: 4
+    mode_split:
+      mantra: 4
+      classic: 0
+    focus_tag: mantra_no_modificatore
+    target_cases: [3, 20, 31, 38]
+  - name: classic_clean_vocab
+    path: datasets/v5/drafts/p4_block_002_classic_clean_vocab.jsonl
+    examples: 4
+    mode_split:
+      mantra: 0
+      classic: 4
+    focus_tag: classic_clean_vocab
+    target_cases: [14, 28, 36, 39]
+  - name: no_invented_modules
+    path: datasets/v5/drafts/p4_block_003_no_invented_modules.jsonl
+    examples: 4
+    mode_split:
+      mantra: 4
+      classic: 0
+    focus_tag: no_invented_modules
+    target_cases: [2]
+  - name: italian_decision_clean
+    path: datasets/v5/drafts/p4_block_004_italian_decision_clean.jsonl
+    examples: 4
+    mode_split:
+      mantra: 0
+      classic: 4
+    focus_tag: italian_decision_clean
+    target_cases: [14, 28, 36, 39]
+
+answer_contract:
+  min_words: 45
+  max_words: 75
+  required_opening_markers:
+    - Sceglierei
+    - Preferirei
+    - Eviterei
+    - Non posso
+  max_missing_context_sentences: 1
+  max_conditional_branches: 1
+
+quality_gates:
+  min_quality_score: 5
+  source: v5_manual
+  no_pagella_training: true
+  forbid_dataset_v3_as_base: true
+  forbid_dataset_v4_as_base: true
+  forbid_eval_prompt_leakage: true
+  forbid_train_prompt_duplicates: true
+  forbid_real_player_names: true
+  forbid_specific_live_facts: true
+  forbid_invented_percentages: true
+  forbid_specific_scores_or_votes: true
+  forbid_fake_rules: true
+  forbid_invented_modules: true
+  forbid_cross_mode_vocabulary: true
+  forbid_broken_generated_words: true
+  keep_mantra_classic_same_level: true
+
+mode_vocabulary_gates:
+  mantra_forbidden_terms:
+    - modificatore
+    - reparto
+  classic_forbidden_terms:
+    - slot
+    - incastro
+    - codice
+    - mantra
+  classic_forbidden_role_codes:
+    - Pc
+    - T
+    - W
+    - M
+    - C
+    - E
+    - Dc
+    - Ds
+    - Dd
+  broken_terms:
+    - offENSIVO
+    - sicurata
+    - multicolore
+    - punteggianza
+    - malusso
+    - maleducata
+    - aspettarello
+    - esattissimi
+    - mojibake
+
+promotion_gates:
+  effective_average_gt: 2.69
+  hallucination_free_gt: 26
+  raw_average_min: 3.10
+  case_2_no_invented_modules: true
+  mantra_forbid_modificatore: true
+  classic_forbid_role_code_leakage: true
+  classic_cases_no_regression: [14, 28, 36, 39]
+  malformed_italian_max_repeated_cases: 1
