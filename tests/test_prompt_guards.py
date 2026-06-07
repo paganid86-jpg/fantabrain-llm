@@ -54,6 +54,11 @@ def test_prompt_guard_rejects_unknown_preset() -> None:
         apply_prompt_guard(messages(), mode="mantra", preset="missing")
 
 
+def test_mode_fence_rejects_unsupported_mode() -> None:
+    with pytest.raises(PromptGuardError, match="Unsupported mode"):
+        apply_prompt_guard(messages(), mode="other", preset="mode_fence_v1")
+
+
 def test_prompt_guard_requires_initial_system_message() -> None:
     with pytest.raises(PromptGuardError, match="first message must be system"):
         apply_prompt_guard(

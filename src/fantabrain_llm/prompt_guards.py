@@ -11,7 +11,7 @@ SHARED_MODE_FENCE_RULES = """Regole condivise:
 - Rispondi in italiano pulito e naturale.
 - Inizia con la decisione o con il rifiuto motivato.
 - Non inventare nomi di giocatori, fatti live, voti futuri esatti o probabilita non disponibili.
-- Se mancano dati chiave, di cosa manca e dai solo un criterio generale.
+- Se mancano dati chiave, dichiara cosa manca e dai solo un criterio generale.
 - Evita parole inventate o malformate."""
 
 MANTRA_MODE_FENCE_RULES = """Regole Mantra:
