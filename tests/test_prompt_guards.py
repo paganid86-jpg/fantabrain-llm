@@ -22,10 +22,11 @@ def test_prompt_guard_names_exposes_none_and_mode_fence() -> None:
 
 
 def test_none_prompt_guard_returns_copy_without_changing_content() -> None:
-    guarded = apply_prompt_guard(messages(), mode="mantra", preset="none")
+    original = messages()
+    guarded = apply_prompt_guard(original, mode="mantra", preset="none")
 
-    assert guarded == messages()
-    assert guarded is not messages()
+    assert guarded == original
+    assert guarded is not original
 
 
 def test_mode_fence_merges_guard_into_single_system_message_for_mantra() -> None:
