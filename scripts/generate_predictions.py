@@ -9,6 +9,11 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from fantabrain_llm.dataset import DatasetError, load_examples, to_generation_messages  # noqa: E402
 from fantabrain_llm.inference import InferenceError, make_chat_client  # noqa: E402
+from fantabrain_llm.prompt_guards import (  # noqa: E402
+    PromptGuardError,
+    apply_prompt_guard,
+    prompt_guard_names,
+)
 from fantabrain_llm.predictions import build_predictions, write_prediction_run  # noqa: E402
 
 
@@ -47,6 +52,12 @@ def parse_args() -> argparse.Namespace:
         help="Load transformers model in 4-bit.",
     )
     parser.add_argument("--torch-dtype", default="bfloat16", help="Torch dtype for transformers.")
+    parser.add_argument(
+        "--prompt-guard",
+        default="none",
+        choices=prompt_guard_names(),
+        help="Optional inference-time prompt guard preset.",
+    )
     return parser.parse_args()
 
 
@@ -70,9 +81,14 @@ def main() -> int:
         responses: list[str] = []
         for index, example in enumerate(examples, start=1):
             print(f"Generating case {index}/{len(examples)}: {example.mode}/{example.task}")
+            prompt_messages = apply_prompt_guard(
+                to_generation_messages(example),
+                mode=example.mode,
+                preset=args.prompt_guard,
+            )
             responses.append(
                 client.generate(
-                    to_generation_messages(example),
+                    prompt_messages,
                     mode=example.mode,
                     task=example.task,
                 )
@@ -93,6 +109,7 @@ def main() -> int:
                 "adapter": args.adapter,
                 "load_in_4bit": args.load_in_4bit,
                 "torch_dtype": args.torch_dtype,
+                "prompt_guard": args.prompt_guard,
                 "decoding": {
                     "max_tokens": args.max_tokens,
                     "temperature": args.temperature,
@@ -102,7 +119,7 @@ def main() -> int:
                 },
             },
         )
-    except (DatasetError, InferenceError) as exc:
+    except (DatasetError, InferenceError, PromptGuardError) as exc:
         print(f"Prediction error: {exc}", file=sys.stderr)
         return 1
 
