@@ -8,7 +8,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Thread
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
