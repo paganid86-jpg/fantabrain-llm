@@ -53,6 +53,23 @@ def test_audit_flags_mantra_forbidden_terms_and_invented_modules() -> None:
     }
 
 
+def test_audit_flags_mantra_module_invention_when_prompt_has_no_modules() -> None:
+    report = audit_prediction_records(
+        [
+            prediction(
+                case_id=4,
+                mode="mantra",
+                prompt="Modalita Mantra. Ho pochi esterni: che approccio uso?",
+                text="Passerei al 4-3-3 per aumentare copertura.",
+            )
+        ]
+    )
+
+    assert report.summary == {"invented_modules": 1}
+    assert report.violations[0].term == "4-3-3"
+    assert report.hard_violation_count == 1
+
+
 def test_audit_allows_classic_role_codes_present_in_prompt() -> None:
     report = audit_prediction_records(
         [

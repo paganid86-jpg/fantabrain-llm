@@ -180,8 +180,9 @@ def _audit_mantra(
             )
 
     prompt_modules = extract_modules(prompt)
+    prediction_modules = extract_modules(prediction)
     if prompt_modules:
-        invented_modules = sorted(extract_modules(prediction) - prompt_modules)
+        invented_modules = sorted(prediction_modules - prompt_modules)
         for module in invented_modules:
             violations.append(
                 AuditViolation(
@@ -191,6 +192,22 @@ def _audit_mantra(
                     check="invented_modules",
                     term=module,
                     message=f"Prediction mentions module not present in prompt: {module}",
+                    hard_gate=True,
+                )
+            )
+    else:
+        for module in sorted(prediction_modules):
+            violations.append(
+                AuditViolation(
+                    case_id=case_id,
+                    mode=mode,
+                    task=task,
+                    check="invented_modules",
+                    term=module,
+                    message=(
+                        "Prediction mentions a numeric module even though "
+                        f"the prompt had none: {module}"
+                    ),
                     hard_gate=True,
                 )
             )
