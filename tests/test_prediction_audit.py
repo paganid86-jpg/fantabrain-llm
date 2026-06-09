@@ -232,3 +232,38 @@ def test_audit_predictions_cli_writes_outputs_and_fails_on_hard_gates(
     assert "Hard violations: 2" in result.stdout
     assert (output_dir / "prediction_audit.json").exists()
     assert (output_dir / "prediction_audit.md").exists()
+
+
+def test_audit_predictions_cli_reports_filesystem_errors_cleanly(tmp_path: Path) -> None:
+    predictions_path = tmp_path / "predictions.jsonl"
+    predictions_path.write_text(
+        json.dumps(
+            prediction(
+                case_id=1,
+                mode="classic",
+                prompt="Modalita Classic. Che faccio?",
+                text="Scegli il titolare.",
+            )
+        ),
+        encoding="utf-8",
+    )
+    output_file = tmp_path / "not-a-directory"
+    output_file.write_text("already here", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/audit_predictions.py",
+            "--predictions",
+            str(predictions_path),
+            "--output-dir",
+            str(output_file),
+        ],
+        cwd=Path(__file__).resolve().parents[1],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "Prediction audit error:" in result.stderr
+    assert "Traceback" not in result.stderr

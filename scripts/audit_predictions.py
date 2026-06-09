@@ -40,7 +40,7 @@ def main(argv: list[str] | None = None) -> int:
         records = load_prediction_records(predictions_path)
         report = audit_prediction_records(records)
         json_path, markdown_path = write_audit_outputs(report, output_dir)
-    except PredictionAuditError as exc:
+    except (OSError, PredictionAuditError) as exc:
         print(f"Prediction audit error: {exc}", file=sys.stderr)
         return 1
 
