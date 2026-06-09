@@ -217,6 +217,36 @@ python scripts/generate_predictions.py \
   --no-repeat-ngram-size 4
 ```
 
+Pagella eval-first con adapter Qwen v2 e prompt guard:
+
+```bash
+python scripts/generate_predictions.py \
+  --provider transformers \
+  --model Qwen/Qwen2.5-3B-Instruct \
+  --adapter models/adapters/qwen25-3b-fantabrain-sft-v2 \
+  --eval benchmarks/pagella_v0.jsonl \
+  --run-name qwen25-3b-fantabrain-sft-v2-mode-fence-v1-pagella-v0 \
+  --load-in-4bit \
+  --torch-dtype float16 \
+  --max-tokens 350 \
+  --temperature 0.3 \
+  --top-p 0.9 \
+  --repetition-penalty 1.15 \
+  --no-repeat-ngram-size 4 \
+  --prompt-guard mode_fence_v1
+```
+
+Poi audit deterministico del run:
+
+```bash
+python scripts/audit_predictions.py \
+  --predictions reports/runs/qwen25-3b-fantabrain-sft-v2-mode-fence-v1-pagella-v0/predictions.jsonl \
+  --output-dir reports/runs/qwen25-3b-fantabrain-sft-v2-mode-fence-v1-pagella-v0 \
+  --fail-on-hard-gates
+```
+
+Il runbook operativo e `docs/runbooks/qwen25-v2-eval-first-guard.md`.
+
 Pagella con adapter Qwen v3:
 
 ```bash
