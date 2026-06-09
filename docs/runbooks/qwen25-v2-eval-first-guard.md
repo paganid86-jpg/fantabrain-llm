@@ -19,14 +19,27 @@ if torch.cuda.is_available():
     print("device:", torch.cuda.get_device_name(0))
 ```
 
-## 2. Clone Or Update Repo
+## 2. Load GitHub Token
 
-Set `GH_TOKEN` as a Colab secret or environment variable before running this cell.
+Set `GH_TOKEN` as a Colab secret, then expose it to shell cells:
+
+```python
+from google.colab import userdata
+import os
+
+os.environ["GH_TOKEN"] = userdata.get("GH_TOKEN") or ""
+assert os.environ["GH_TOKEN"], "GH_TOKEN missing from Colab Secrets"
+```
+
+## 3. Clone Or Update Repo
+
+While this PR is under review, the branch is `codex/v2-eval-first-guard`. After merge, set `FANTABRAIN_BRANCH` to `master`.
 
 ```bash
 %%bash
 set -euo pipefail
 
+BRANCH="${FANTABRAIN_BRANCH:-codex/v2-eval-first-guard}"
 REPO_URL="https://${GH_TOKEN}@github.com/paganid86-jpg/fantabrain-llm.git"
 
 if [ ! -d /content/fantabrain-llm/.git ]; then
@@ -34,13 +47,13 @@ if [ ! -d /content/fantabrain-llm/.git ]; then
 fi
 
 cd /content/fantabrain-llm
-git fetch origin master
-git switch master
-git pull --ff-only origin master
+git fetch origin "$BRANCH"
+git switch "$BRANCH"
+git pull --ff-only origin "$BRANCH"
 git status -sb
 ```
 
-## 3. Install Dependencies
+## 4. Install Dependencies
 
 ```bash
 %%bash
@@ -52,7 +65,7 @@ python -m pip install -e ".[dev,train]"
 python -m pip install -U "bitsandbytes>=0.46.1"
 ```
 
-## 4. Restore Adapter v2
+## 5. Restore Adapter v2
 
 Upload `qwen25-3b-fantabrain-sft-v2-adapter.zip` if the adapter directory is missing.
 
@@ -91,7 +104,7 @@ adapter config: True
 adapter model: True
 ```
 
-## 5. Guarded Pagella Run
+## 6. Guarded Pagella Run
 
 ```bash
 %%bash
@@ -120,7 +133,7 @@ Expected output directory:
 reports/runs/qwen25-3b-fantabrain-sft-v2-mode-fence-v1-pagella-v0
 ```
 
-## 6. Prediction Audit
+## 7. Prediction Audit
 
 ```bash
 %%bash
@@ -142,7 +155,7 @@ prediction_audit.md
 
 If `--fail-on-hard-gates` exits with code `1`, the audit still wrote the files. Read `prediction_audit.md` to see which cases triggered hard violations.
 
-## 7. Download Report
+## 8. Download Report
 
 ```bash
 %%bash

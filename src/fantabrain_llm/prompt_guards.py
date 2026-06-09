@@ -21,7 +21,8 @@ MANTRA_MODE_FENCE_RULES = """Regole Mantra:
 - Se il prompt non cita moduli numerici, non inventare un numero di modulo."""
 
 CLASSIC_MODE_FENCE_RULES = """Regole Classic:
-- Ragiona con reparti, titolarita, bonus, malus, modificatore difesa quando rilevante e panchina per reparto.
+- Ragiona con reparti, titolarita, bonus, malus, modificatore difesa quando rilevante
+  e panchina per reparto.
 - Non usare codici ruolo Mantra come Pc, T, W, A, M, E, Dc, Dd o Ds se l'utente non chiede Mantra.
 - Non parlare di incastri di modulo come se Classic fosse Mantra."""
 

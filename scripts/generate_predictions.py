@@ -9,12 +9,12 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from fantabrain_llm.dataset import DatasetError, load_examples, to_generation_messages  # noqa: E402
 from fantabrain_llm.inference import InferenceError, make_chat_client  # noqa: E402
+from fantabrain_llm.predictions import build_predictions, write_prediction_run  # noqa: E402
 from fantabrain_llm.prompt_guards import (  # noqa: E402
     PromptGuardError,
     apply_prompt_guard,
     prompt_guard_names,
 )
-from fantabrain_llm.predictions import build_predictions, write_prediction_run  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
