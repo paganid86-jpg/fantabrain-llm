@@ -155,6 +155,20 @@ def render_audit_markdown(report: AuditReport) -> str:
     return "\n".join(lines)
 
 
+def write_audit_outputs(report: AuditReport, output_dir: str | Path) -> tuple[Path, Path]:
+    target = Path(output_dir)
+    target.mkdir(parents=True, exist_ok=True)
+
+    json_path = target / "prediction_audit.json"
+    markdown_path = target / "prediction_audit.md"
+    json_path.write_text(
+        json.dumps(report.to_dict(), indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    markdown_path.write_text(render_audit_markdown(report), encoding="utf-8")
+    return json_path, markdown_path
+
+
 def _audit_mantra(
     case_id: int,
     mode: str,

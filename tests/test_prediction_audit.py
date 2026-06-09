@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
+from pathlib import Path
+
 from fantabrain_llm.prediction_audit import (
     audit_prediction_records,
     extract_modules,
@@ -185,3 +190,45 @@ def test_render_audit_markdown_includes_summary_and_case_details() -> None:
     assert "Case 3" in markdown
     assert "modificatore" in markdown
     assert report.to_dict()["hard_violation_count"] == 1
+
+
+def test_audit_predictions_cli_writes_outputs_and_fails_on_hard_gates(
+    tmp_path: Path,
+) -> None:
+    predictions_path = tmp_path / "predictions.jsonl"
+    predictions_path.write_text(
+        "\n".join(
+            [
+                json.dumps(
+                    prediction(
+                        case_id=2,
+                        mode="mantra",
+                        prompt="Modalita Mantra. Meglio 3-4-2-1 o 4-3-3?",
+                        text="Sceglierei 4-5-1 con modificatore.",
+                    )
+                )
+            ]
+        ),
+        encoding="utf-8",
+    )
+    output_dir = tmp_path / "audit"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "scripts/audit_predictions.py",
+            "--predictions",
+            str(predictions_path),
+            "--output-dir",
+            str(output_dir),
+            "--fail-on-hard-gates",
+        ],
+        cwd=Path(__file__).resolve().parents[1],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    assert "Hard violations: 2" in result.stdout
+    assert (output_dir / "prediction_audit.json").exists()
+    assert (output_dir / "prediction_audit.md").exists()
