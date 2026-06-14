@@ -154,6 +154,24 @@ def test_audit_flags_malformed_terms_as_soft_violations() -> None:
     assert report.hard_violation_count == 0
 
 
+def test_audit_does_not_flag_normal_words_that_contain_malformed_terms() -> None:
+    report = audit_prediction_records(
+        [
+            prediction(
+                case_id=36,
+                mode="classic",
+                prompt="Modalita Classic. Spiegami il modificatore difesa.",
+                text=(
+                    "Il profilo offensivo resta utile, ma il valore nasce "
+                    "da voto medio e punteggiature del regolamento."
+                ),
+            )
+        ]
+    )
+
+    assert report.violations == []
+
+
 def test_audit_clean_record_has_no_violations() -> None:
     report = audit_prediction_records(
         [

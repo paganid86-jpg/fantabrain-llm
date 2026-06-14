@@ -278,11 +278,10 @@ def _audit_malformed_terms(
     task: str,
     prediction: str,
 ) -> list[AuditViolation]:
-    lowered_prediction = prediction.lower()
     violations: list[AuditViolation] = []
 
     for term in MALFORMED_TERMS:
-        if term.lower() in lowered_prediction:
+        if _contains_malformed_term(prediction, term):
             violations.append(
                 AuditViolation(
                     case_id=case_id,
@@ -296,6 +295,12 @@ def _audit_malformed_terms(
             )
 
     return violations
+
+
+def _contains_malformed_term(text: str, term: str) -> bool:
+    flags = 0 if any(character.isupper() for character in term) else re.IGNORECASE
+    pattern = rf"(?<![A-Za-z]){re.escape(term)}(?![A-Za-z])"
+    return re.search(pattern, text, flags=flags) is not None
 
 
 def _extract_role_codes(text: str) -> set[str]:
