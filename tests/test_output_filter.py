@@ -1,6 +1,15 @@
 from __future__ import annotations
 
-from fantabrain_llm.output_filter import FilterAction, filter_model_output
+import json
+from pathlib import Path
+
+from fantabrain_llm.output_filter import (
+    FilterAction,
+    filter_model_output,
+    filter_prediction_records,
+    render_filter_markdown,
+    write_filter_outputs,
+)
 
 
 def filter_output(
@@ -18,6 +27,29 @@ def filter_output(
         prediction=prediction,
         fallback_failed=fallback_failed,
     )
+
+
+def prediction_record(
+    *,
+    case_id: int,
+    mode: str,
+    task: str,
+    prompt: str,
+    prediction: str,
+    expected: str = "Expected answer.",
+    provider: str = "echo",
+    model: str = "echo-baseline",
+) -> dict[str, object]:
+    return {
+        "case_id": case_id,
+        "mode": mode,
+        "task": task,
+        "prompt": prompt,
+        "prediction": prediction,
+        "expected": expected,
+        "provider": provider,
+        "model": model,
+    }
 
 
 def test_clean_mantra_output_passes_without_violations() -> None:
@@ -105,3 +137,72 @@ def test_failed_fallback_after_hard_violation_returns_safe() -> None:
     assert decision.action is FilterAction.SAFE
     assert decision.reason == "fallback_failed_hard_violations"
     assert [violation.check for violation in decision.violations] == ["invented_modules"]
+
+
+def test_filter_prediction_records_counts_actions() -> None:
+    report = filter_prediction_records(
+        [
+            prediction_record(
+                case_id=1,
+                mode="mantra",
+                task="lineup_advice",
+                prompt="Modalita Mantra. Meglio 3-4-2-1 o 4-3-3?",
+                prediction="Sceglierei 3-4-2-1 se hai copertura sugli esterni.",
+            ),
+            prediction_record(
+                case_id=2,
+                mode="mantra",
+                task="lineup_advice",
+                prompt="Modalita Mantra. Meglio 3-4-2-1 o 4-3-3?",
+                prediction="Sceglierei 4-5-1 per proteggere meglio il centrocampo.",
+            ),
+        ]
+    )
+
+    assert report.cases == 2
+    assert report.decision_counts == {"pass": 1, "fallback": 1}
+    assert report.violation_counts == {"invented_modules": 1}
+    assert report.results[1].decision.action is FilterAction.FALLBACK
+
+
+def test_render_filter_markdown_includes_summary_and_cases() -> None:
+    report = filter_prediction_records(
+        [
+            prediction_record(
+                case_id=2,
+                mode="mantra",
+                task="lineup_advice",
+                prompt="Modalita Mantra. Meglio 3-4-2-1 o 4-3-3?",
+                prediction="Sceglierei 4-5-1 per proteggere meglio il centrocampo.",
+            )
+        ]
+    )
+
+    markdown = render_filter_markdown(report)
+
+    assert "# Output Filter Report" in markdown
+    assert "fallback: 1" in markdown
+    assert "Case 2" in markdown
+    assert "invented_modules" in markdown
+
+
+def test_write_filter_outputs_writes_json_and_markdown(tmp_path: Path) -> None:
+    report = filter_prediction_records(
+        [
+            prediction_record(
+                case_id=1,
+                mode="mantra",
+                task="lineup_advice",
+                prompt="Modalita Mantra. Meglio 3-4-2-1 o 4-3-3?",
+                prediction="Sceglierei 3-4-2-1 se hai copertura sugli esterni.",
+            )
+        ]
+    )
+
+    json_path, markdown_path = write_filter_outputs(report, tmp_path)
+
+    assert json_path.name == "output_filter.json"
+    assert markdown_path.name == "output_filter.md"
+    payload = json.loads(json_path.read_text(encoding="utf-8"))
+    assert payload["cases"] == 1
+    assert payload["decision_counts"] == {"pass": 1}
