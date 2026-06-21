@@ -165,6 +165,26 @@ def test_filter_prediction_records_counts_actions() -> None:
     assert report.results[1].decision.action is FilterAction.FALLBACK
 
 
+def test_filter_prediction_records_preserves_empty_prediction_safe_decision() -> None:
+    report = filter_prediction_records(
+        [
+            prediction_record(
+                case_id=1,
+                mode="mantra",
+                task="lineup_advice",
+                prompt="Modalita Mantra. Chi schiero?",
+                prediction="  \n\t  ",
+            )
+        ]
+    )
+
+    assert report.cases == 1
+    assert report.decision_counts == {"safe": 1}
+    assert report.violation_counts == {}
+    assert report.results[0].decision.action is FilterAction.SAFE
+    assert report.results[0].decision.reason == "empty_prediction"
+
+
 def test_render_filter_markdown_includes_summary_and_cases() -> None:
     report = filter_prediction_records(
         [

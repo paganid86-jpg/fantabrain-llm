@@ -142,7 +142,7 @@ def filter_prediction_records(records: Iterable[dict[str, object]]) -> FilterRep
         mode = _require_str(record, "mode")
         task = _require_str(record, "task")
         prompt = _require_str(record, "prompt")
-        prediction = _require_str(record, "prediction")
+        prediction = _require_prediction(record)
 
         decision = filter_model_output(
             mode=mode,
@@ -244,6 +244,13 @@ def _require_str(record: dict[str, object], field: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise OutputFilterError(f"prediction record {field!r} must be a non-empty string")
     return value.strip()
+
+
+def _require_prediction(record: dict[str, object]) -> str:
+    value = record.get("prediction")
+    if not isinstance(value, str):
+        raise OutputFilterError("prediction record 'prediction' must be a string")
+    return value
 
 
 def _require_int(record: dict[str, object], field: str) -> int:
