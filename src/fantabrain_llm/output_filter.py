@@ -85,6 +85,7 @@ def filter_model_output(
     prediction: str,
     preset: str = "app_v0",
     fallback_failed: bool = False,
+    case_id: int = 1,
 ) -> FilterDecision:
     if preset != "app_v0":
         raise OutputFilterError(f"Unsupported output filter preset: {preset}")
@@ -99,7 +100,7 @@ def filter_model_output(
     report = audit_prediction_records(
         [
             {
-                "case_id": 1,
+                "case_id": case_id,
                 "mode": mode,
                 "task": task,
                 "prompt": prompt,
@@ -149,6 +150,7 @@ def filter_prediction_records(records: Iterable[dict[str, object]]) -> FilterRep
             task=task,
             prompt=prompt,
             prediction=prediction,
+            case_id=case_id,
         )
         results.append(
             FilteredPrediction(

@@ -165,6 +165,25 @@ def test_filter_prediction_records_counts_actions() -> None:
     assert report.results[1].decision.action is FilterAction.FALLBACK
 
 
+def test_filter_prediction_records_preserves_case_id_on_nested_violations() -> None:
+    report = filter_prediction_records(
+        [
+            prediction_record(
+                case_id=42,
+                mode="mantra",
+                task="lineup_advice",
+                prompt="Modalita Mantra. Meglio 3-4-2-1 o 4-3-3?",
+                prediction="Sceglierei 4-5-1 per proteggere meglio il centrocampo.",
+            )
+        ]
+    )
+
+    result = report.results[0]
+
+    assert result.case_id == 42
+    assert result.decision.violations[0].case_id == 42
+
+
 def test_filter_prediction_records_preserves_empty_prediction_safe_decision() -> None:
     report = filter_prediction_records(
         [
