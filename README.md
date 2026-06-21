@@ -245,6 +245,14 @@ python scripts/audit_predictions.py \
   --fail-on-hard-gates
 ```
 
+Apply the app-oriented output filter to a prediction run:
+
+```bash
+python scripts/filter_predictions.py \
+  --predictions reports/runs/<run-name>/predictions.jsonl \
+  --output-dir reports/runs/<run-name>
+```
+
 Il runbook operativo e `docs/runbooks/qwen25-v2-eval-first-guard.md`.
 
 Pagella con adapter Qwen v3:
