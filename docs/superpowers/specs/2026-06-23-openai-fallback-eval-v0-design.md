@@ -195,8 +195,8 @@ If the fallback answer also filters to `fallback` or `safe`, use a conservative 
 Initial safe response:
 
 ```text
-Mi manca contesto sufficiente per chiuderla con sicurezza.
-Ti do una lettura prudente: evita scelte basate su dati non confermati e confronta titolarita, copertura, ruolo/modalita e rischio prima di decidere.
+Damn, non ho abbastanza contesto per chiuderla con sicurezza.
+Ti do una lettura prudente: evita scelte basate su dati non confermati e confronta titolarita, copertura, modalita e rischio prima di decidere.
 ```
 
 The safe response should be explicit in reports with `final_source: "safe"`.
@@ -298,4 +298,3 @@ App integration must keep provider keys server-side only. The frontend should ne
 ## Rollback
 
 This is eval-only. If results are poor or costs look too high, do not integrate fallback into the app. Keep output filter v0 and continue improving the primary model or try a different fallback strategy.
-

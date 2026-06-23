@@ -69,8 +69,8 @@ fallback_action in {FilterAction.PASS, FilterAction.PASS_WITH_WARNINGS}
 Safe final answer:
 
 ```text
-Mi manca contesto sufficiente per chiuderla con sicurezza.
-Ti do una lettura prudente: evita scelte basate su dati non confermati e confronta titolarita, copertura, ruolo/modalita e rischio prima di decidere.
+Damn, non ho abbastanza contesto per chiuderla con sicurezza.
+Ti do una lettura prudente: evita scelte basate su dati non confermati e confronta titolarita, copertura, modalita e rischio prima di decidere.
 ```
 
 ---
@@ -707,9 +707,9 @@ from fantabrain_llm.openai_fallback import FallbackResponse, FallbackUsage
 
 
 SAFE_FALLBACK_RESPONSE = (
-    "Mi manca contesto sufficiente per chiuderla con sicurezza.\n"
+    "Damn, non ho abbastanza contesto per chiuderla con sicurezza.\n"
     "Ti do una lettura prudente: evita scelte basate su dati non confermati "
-    "e confronta titolarita, copertura, ruolo/modalita e rischio prima di decidere."
+    "e confronta titolarita, copertura, modalita e rischio prima di decidere."
 )
 
 
