@@ -125,7 +125,7 @@ def test_missing_api_key_raises_clear_error(monkeypatch: pytest.MonkeyPatch) -> 
 
 def test_estimate_cost_for_gpt54_mini_standard_pricing() -> None:
     assert estimate_cost_usd(input_tokens=1000, output_tokens=500) == pytest.approx(
-        0.00225
+        0.003
     )
 
 
@@ -178,7 +178,7 @@ def test_generate_posts_responses_payload_and_extracts_output_text(
     assert response.model == "gpt-5.4-mini"
     assert response.usage.input_tokens == 1000
     assert response.usage.output_tokens == 500
-    assert response.usage.estimated_cost_usd == pytest.approx(0.00225)
+    assert response.usage.estimated_cost_usd == pytest.approx(0.003)
 
 
 def test_generate_extracts_nested_output_text(monkeypatch: pytest.MonkeyPatch) -> None:
