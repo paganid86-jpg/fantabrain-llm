@@ -31,6 +31,20 @@ class FakeHTTPResponse:
         return None
 
 
+class FakeRawHTTPResponse:
+    def __init__(self, body: bytes) -> None:
+        self.body = body
+
+    def __enter__(self) -> FakeRawHTTPResponse:
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        return None
+
+    def read(self) -> bytes:
+        return self.body
+
+
 def test_missing_api_key_raises_clear_error(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
 
@@ -134,6 +148,30 @@ def test_http_error_is_wrapped(monkeypatch: pytest.MonkeyPatch) -> None:
 
     client = OpenAIFallbackClient(api_key="sk-test")
     with pytest.raises(OpenAIFallbackError, match="rate limited"):
+        client.generate(mode="mantra", task="lineup_advice", prompt="Chi schiero?")
+
+
+def test_timeout_error_is_wrapped(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_urlopen(request: object, timeout: int) -> FakeHTTPResponse:
+        del request, timeout
+        raise TimeoutError("timed out")
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+
+    client = OpenAIFallbackClient(api_key="sk-test")
+    with pytest.raises(OpenAIFallbackError, match="timed out"):
+        client.generate(mode="mantra", task="lineup_advice", prompt="Chi schiero?")
+
+
+def test_invalid_response_bytes_are_wrapped(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_urlopen(request: object, timeout: int) -> FakeRawHTTPResponse:
+        del request, timeout
+        return FakeRawHTTPResponse(b"\xff")
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+
+    client = OpenAIFallbackClient(api_key="sk-test")
+    with pytest.raises(OpenAIFallbackError, match="decode"):
         client.generate(mode="mantra", task="lineup_advice", prompt="Chi schiero?")
 
 

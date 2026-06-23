@@ -108,6 +108,14 @@ class OpenAIFallbackClient:
             raise OpenAIFallbackError(_format_http_error(exc)) from exc
         except urllib.error.URLError as exc:
             raise OpenAIFallbackError(f"OpenAI fallback request failed: {exc.reason}") from exc
+        except TimeoutError as exc:
+            raise OpenAIFallbackError(f"OpenAI fallback request timed out: {exc}") from exc
+        except OSError as exc:
+            raise OpenAIFallbackError(f"OpenAI fallback request failed: {exc}") from exc
+        except UnicodeDecodeError as exc:
+            raise OpenAIFallbackError(
+                f"OpenAI fallback response decode failed: {exc}"
+            ) from exc
         except json.JSONDecodeError as exc:
             raise OpenAIFallbackError("OpenAI fallback returned invalid JSON.") from exc
 
