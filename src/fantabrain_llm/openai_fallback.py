@@ -60,11 +60,17 @@ def estimate_cost_usd(
 ) -> float | None:
     if input_tokens is None or output_tokens is None:
         return None
-    if model != DEFAULT_FALLBACK_MODEL:
+    if not _uses_gpt54_mini_pricing(model):
         return None
     return (
         (input_tokens / 1_000_000) * GPT54_MINI_INPUT_USD_PER_MTOK
         + (output_tokens / 1_000_000) * GPT54_MINI_OUTPUT_USD_PER_MTOK
+    )
+
+
+def _uses_gpt54_mini_pricing(model: str) -> bool:
+    return model == DEFAULT_FALLBACK_MODEL or model.startswith(
+        f"{DEFAULT_FALLBACK_MODEL}-"
     )
 
 
