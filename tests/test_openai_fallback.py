@@ -54,6 +54,11 @@ def test_missing_api_key_raises_clear_error(monkeypatch: pytest.MonkeyPatch) -> 
 
 def test_estimate_cost_for_default_model() -> None:
     assert estimate_cost_usd(1000, 500) == pytest.approx(0.003)
+    assert estimate_cost_usd(
+        230,
+        207,
+        model=f"{DEFAULT_FALLBACK_MODEL}-2026-06-24",
+    ) == pytest.approx(0.001104)
     assert estimate_cost_usd(None, 500) is None
     assert estimate_cost_usd(1000, None) is None
     assert estimate_cost_usd(1000, 500, model="other-model") is None
@@ -131,6 +136,30 @@ def test_generate_parses_nested_output_text(monkeypatch: pytest.MonkeyPatch) -> 
 
     assert response.text == "Eviterei il rischio inutile."
     assert response.usage.estimated_cost_usd == pytest.approx(0.0006)
+
+
+def test_generate_estimates_cost_for_versioned_response_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    response_model = f"{DEFAULT_FALLBACK_MODEL}-2026-06-24"
+
+    def fake_urlopen(request: object, timeout: int) -> FakeHTTPResponse:
+        del request, timeout
+        return FakeHTTPResponse(
+            {
+                "model": response_model,
+                "output_text": "Risposta pulita.",
+                "usage": {"input_tokens": 230, "output_tokens": 207},
+            }
+        )
+
+    monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
+
+    client = OpenAIFallbackClient(api_key="test-api-key")
+    response = client.generate(mode="mantra", task="lineup_advice", prompt="Chi scelgo?")
+
+    assert response.model == response_model
+    assert response.usage.estimated_cost_usd == pytest.approx(0.001104)
 
 
 def test_http_error_is_wrapped(monkeypatch: pytest.MonkeyPatch) -> None:

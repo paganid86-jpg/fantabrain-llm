@@ -44,6 +44,7 @@ class FallbackCaseResult:
     primary_reason: str
     primary_violations: list[dict[str, object]]
     fallback_used: bool
+    fallback_model: str | None
     fallback_prediction: str | None
     fallback_action: str | None
     fallback_reason: str | None
@@ -65,6 +66,7 @@ class FallbackCaseResult:
             "primary_reason": self.primary_reason,
             "primary_violations": self.primary_violations,
             "fallback_used": self.fallback_used,
+            "fallback_model": self.fallback_model,
             "fallback_prediction": self.fallback_prediction,
             "fallback_action": self.fallback_action,
             "fallback_reason": self.fallback_reason,
@@ -136,6 +138,7 @@ def run_fallback_eval(
         fallback_action: str | None = None
         fallback_reason: str | None = None
         fallback_violations: list[dict[str, object]] = []
+        fallback_model: str | None = None
         usage: FallbackUsage | None = None
         estimated_cost_usd: float | None = None
 
@@ -145,6 +148,7 @@ def run_fallback_eval(
                 task=task,
                 prompt=prompt,
             )
+            fallback_model = fallback_response.model
             fallback_prediction = fallback_response.text
             usage = fallback_response.usage
             estimated_cost_usd = usage.estimated_cost_usd
@@ -186,6 +190,7 @@ def run_fallback_eval(
                 primary_reason=primary_decision.reason,
                 primary_violations=primary_violations,
                 fallback_used=fallback_used,
+                fallback_model=fallback_model,
                 fallback_prediction=fallback_prediction,
                 fallback_action=fallback_action,
                 fallback_reason=fallback_reason,
@@ -332,6 +337,7 @@ def render_fallback_eval_markdown(report: FallbackEvalReport) -> str:
                 "",
                 f"- Primary action: {result.primary_action}",
                 f"- Fallback action: {result.fallback_action}",
+                f"- Fallback model: {result.fallback_model}",
                 f"- Final source: {result.final_source.value}",
                 f"- Estimated cost USD: {result.estimated_cost_usd}",
             ]
@@ -390,6 +396,7 @@ def _fallback_prediction_row(result: FallbackCaseResult) -> dict[str, object]:
         "primary_action": result.primary_action,
         "primary_reason": result.primary_reason,
         "fallback_used": result.fallback_used,
+        "fallback_model": result.fallback_model,
         "fallback_prediction": result.fallback_prediction,
         "fallback_action": result.fallback_action,
         "fallback_reason": result.fallback_reason,

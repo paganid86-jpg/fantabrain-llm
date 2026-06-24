@@ -38,13 +38,14 @@ def prediction_record(
 def fallback_response(
     text: str,
     *,
+    model: str = "fake-fallback",
     input_tokens: int | None = 10,
     output_tokens: int | None = 20,
     estimated_cost_usd: float | None = 0.001,
 ) -> FallbackResponse:
     return FallbackResponse(
         text=text,
-        model="fake-fallback",
+        model=model,
         usage=FallbackUsage(
             input_tokens=input_tokens,
             output_tokens=output_tokens,
@@ -98,7 +99,10 @@ def test_primary_pass_with_warnings_does_not_call_fallback() -> None:
 
 def test_primary_fallback_calls_fallback_and_clean_fallback_becomes_final() -> None:
     client = FakeFallbackClient(
-        fallback_response("Sceglierei 3-4-2-1, restando sui moduli citati.")
+        fallback_response(
+            "Sceglierei 3-4-2-1, restando sui moduli citati.",
+            model="gpt-5.4-mini-2026-06-24",
+        )
     )
 
     report = run_fallback_eval(
@@ -121,6 +125,7 @@ def test_primary_fallback_calls_fallback_and_clean_fallback_becomes_final() -> N
     assert result.primary_action == "fallback"
     assert result.fallback_used is True
     assert result.fallback_action == "pass"
+    assert result.fallback_model == "gpt-5.4-mini-2026-06-24"
     assert result.final_source is FinalSource.FALLBACK
     assert result.final_prediction == "Sceglierei 3-4-2-1, restando sui moduli citati."
     assert result.usage == FallbackUsage(
@@ -210,6 +215,7 @@ def test_summary_counts_actions_sources_violations_and_cost() -> None:
         "safe": 1,
     }
     assert report.to_dict()["results"][1]["final_source"] == "fallback"
+    assert report.to_dict()["results"][1]["fallback_model"] == "fake-fallback"
     assert report.to_dict()["results"][1]["usage"]["estimated_cost_usd"] == 0.001
 
 
@@ -243,6 +249,7 @@ def test_render_fallback_eval_markdown_includes_summary_and_flagged_case() -> No
     assert "fallback_used_count: 1" in markdown
     assert "Case 2: mantra / lineup_advice" in markdown
     assert "Final source: fallback" in markdown
+    assert "Fallback model: fake-fallback" in markdown
 
 
 def test_write_fallback_eval_outputs_writes_json_markdown_and_jsonl(
@@ -280,3 +287,4 @@ def test_write_fallback_eval_outputs_writes_json_markdown_and_jsonl(
     assert rows[1]["case_id"] == 2
     assert rows[1]["prediction"] == "Sceglierei 3-4-2-1, restando sui moduli citati."
     assert rows[1]["final_source"] == "fallback"
+    assert rows[1]["fallback_model"] == "fake-fallback"

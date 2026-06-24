@@ -264,7 +264,7 @@ python scripts/run_fallback_eval.py \
   --temperature 0.2
 ```
 
-The command writes `fallback_eval.json`, `fallback_eval.md`, and `fallback_predictions.jsonl`. Tests mock the OpenAI call and never use the real API.
+The command writes `fallback_eval.json`, `fallback_eval.md`, and `fallback_predictions.jsonl`. Reports include the actual `fallback_model` returned by OpenAI and estimate cost for `gpt-5.4-mini` versioned response ids. Tests mock the OpenAI call and never use the real API.
 
 Il runbook operativo e `docs/runbooks/qwen25-v2-eval-first-guard.md`.
 Il runbook fallback operativo e `docs/runbooks/openai-fallback-eval-v0.md`.

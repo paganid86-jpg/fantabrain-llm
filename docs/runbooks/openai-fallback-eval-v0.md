@@ -37,7 +37,12 @@ The most important fields are:
 - `fallback_used_count`: how often Qwen/LoRA failed hard enough to need fallback.
 - `fallback_success_count`: how often fallback cleared the second filter pass.
 - `unresolved_safe_count`: how often both primary and fallback failed.
+- `fallback_model`: actual model id returned by OpenAI for each fallback case.
 - `estimated_total_cost_usd`: rough fallback cost from API usage tokens.
+
+Cost estimation supports `gpt-5.4-mini` and versioned response ids such as
+`gpt-5.4-mini-...`. If usage tokens are missing or the model is unknown, cost is
+reported as `null` instead of guessed.
 
 ## Product Gate
 
