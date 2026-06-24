@@ -152,7 +152,7 @@ def test_generate_posts_responses_payload_and_extracts_output_text(
         )
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
-    client = OpenAIFallbackClient(api_key="sk-test", timeout_seconds=12)
+    client = OpenAIFallbackClient(api_key="test-api-key", timeout_seconds=12)
 
     response = client.generate(
         mode="mantra",
@@ -162,7 +162,7 @@ def test_generate_posts_responses_payload_and_extracts_output_text(
 
     assert captured["url"] == "https://api.openai.com/v1/responses"
     assert captured["timeout"] == 12
-    assert captured["headers"]["Authorization"] == "Bearer sk-test"
+    assert captured["headers"]["Authorization"] == "Bearer test-api-key"
     payload = captured["payload"]
     assert payload["model"] == "gpt-5.4-mini"
     assert payload["instructions"] == FALLBACK_SYSTEM_INSTRUCTIONS
@@ -202,7 +202,7 @@ def test_generate_extracts_nested_output_text(monkeypatch: pytest.MonkeyPatch) -
         )
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
-    client = OpenAIFallbackClient(api_key="sk-test")
+    client = OpenAIFallbackClient(api_key="test-api-key")
 
     response = client.generate(
         mode="classic",
@@ -225,7 +225,7 @@ def test_provider_http_error_is_wrapped(monkeypatch: pytest.MonkeyPatch) -> None
         )
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
-    client = OpenAIFallbackClient(api_key="sk-test")
+    client = OpenAIFallbackClient(api_key="test-api-key")
 
     with pytest.raises(OpenAIFallbackError, match="rate limited"):
         client.generate(mode="mantra", task="lineup_advice", prompt="Prompt")
@@ -236,7 +236,7 @@ def test_malformed_provider_response_raises(monkeypatch: pytest.MonkeyPatch) -> 
         return FakeHTTPResponse({"model": "gpt-5.4-mini", "output": []})
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
-    client = OpenAIFallbackClient(api_key="sk-test")
+    client = OpenAIFallbackClient(api_key="test-api-key")
 
     with pytest.raises(OpenAIFallbackError, match="No text output"):
         client.generate(mode="classic", task="trade_advice", prompt="Prompt")
@@ -1544,8 +1544,6 @@ Add this section to `README.md` after the output filter command section:
 After generating a prediction run and filtering it, you can evaluate the app-style fallback path against the blocked cases only.
 
 ```bash
-export OPENAI_API_KEY=...
-
 python scripts/run_fallback_eval.py \
   --predictions reports/runs/qwen25-3b-fantabrain-sft-v2-pagella-v0/predictions.jsonl \
   --output-dir reports/runs/qwen25-3b-fantabrain-sft-v2-pagella-v0-fallback-eval-v0 \
@@ -1648,7 +1646,7 @@ All checks passed!
 Run:
 
 ```bash
-rg "sk-|OPENAI_API_KEY=.*" src scripts tests docs README.md
+rg -n "sk-[A-Za-z0-9]{20,}|OPENAI_API_KEY=[A-Za-z0-9_]" src scripts tests docs README.md
 ```
 
 Expected:

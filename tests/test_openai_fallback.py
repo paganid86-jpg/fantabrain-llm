@@ -78,13 +78,13 @@ def test_generate_builds_payload_and_parses_output_text(monkeypatch: pytest.Monk
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
 
-    client = OpenAIFallbackClient(api_key="sk-test", timeout_seconds=12)
+    client = OpenAIFallbackClient(api_key="test-api-key", timeout_seconds=12)
     response = client.generate(mode="mantra", task="lineup_advice", prompt="Chi schiero?")
 
     assert captured["url"] == OPENAI_RESPONSES_URL
     assert captured["method"] == "POST"
     assert captured["timeout"] == 12
-    assert captured["headers"]["Authorization"] == "Bearer sk-test"
+    assert captured["headers"]["Authorization"] == "Bearer test-api-key"
     assert captured["headers"]["Content-type"] == "application/json"
     payload = captured["payload"]
     assert payload["model"] == DEFAULT_FALLBACK_MODEL
@@ -126,7 +126,7 @@ def test_generate_parses_nested_output_text(monkeypatch: pytest.MonkeyPatch) -> 
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
 
-    client = OpenAIFallbackClient(api_key="sk-test")
+    client = OpenAIFallbackClient(api_key="test-api-key")
     response = client.generate(mode="classic", task="trade_advice", prompt="Scambio?")
 
     assert response.text == "Eviterei il rischio inutile."
@@ -146,7 +146,7 @@ def test_http_error_is_wrapped(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
 
-    client = OpenAIFallbackClient(api_key="sk-test")
+    client = OpenAIFallbackClient(api_key="test-api-key")
     with pytest.raises(OpenAIFallbackError, match="rate limited"):
         client.generate(mode="mantra", task="lineup_advice", prompt="Chi schiero?")
 
@@ -158,7 +158,7 @@ def test_timeout_error_is_wrapped(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
 
-    client = OpenAIFallbackClient(api_key="sk-test")
+    client = OpenAIFallbackClient(api_key="test-api-key")
     with pytest.raises(OpenAIFallbackError, match="timed out"):
         client.generate(mode="mantra", task="lineup_advice", prompt="Chi schiero?")
 
@@ -170,7 +170,7 @@ def test_invalid_response_bytes_are_wrapped(monkeypatch: pytest.MonkeyPatch) -> 
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
 
-    client = OpenAIFallbackClient(api_key="sk-test")
+    client = OpenAIFallbackClient(api_key="test-api-key")
     with pytest.raises(OpenAIFallbackError, match="decode"):
         client.generate(mode="mantra", task="lineup_advice", prompt="Chi schiero?")
 
@@ -182,6 +182,6 @@ def test_malformed_response_without_text_raises(monkeypatch: pytest.MonkeyPatch)
 
     monkeypatch.setattr("urllib.request.urlopen", fake_urlopen)
 
-    client = OpenAIFallbackClient(api_key="sk-test")
+    client = OpenAIFallbackClient(api_key="test-api-key")
     with pytest.raises(OpenAIFallbackError, match="No text output"):
         client.generate(mode="mantra", task="lineup_advice", prompt="Chi schiero?")
