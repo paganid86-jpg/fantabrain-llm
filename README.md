@@ -253,7 +253,21 @@ python scripts/filter_predictions.py \
   --output-dir reports/runs/<run-name>
 ```
 
+OpenAI fallback eval over blocked outputs only:
+
+```bash
+python scripts/run_fallback_eval.py \
+  --predictions reports/runs/qwen25-3b-fantabrain-sft-v2-mode-fence-v1-pagella-v0/predictions.jsonl \
+  --output-dir reports/runs/qwen25-3b-fantabrain-sft-v2-mode-fence-v1-pagella-v0-fallback-eval-v0 \
+  --fallback-model gpt-5.4-mini \
+  --max-output-tokens 350 \
+  --temperature 0.2
+```
+
+The command writes `fallback_eval.json`, `fallback_eval.md`, and `fallback_predictions.jsonl`. Tests mock the OpenAI call and never use the real API.
+
 Il runbook operativo e `docs/runbooks/qwen25-v2-eval-first-guard.md`.
+Il runbook fallback operativo e `docs/runbooks/openai-fallback-eval-v0.md`.
 
 Pagella con adapter Qwen v3:
 
