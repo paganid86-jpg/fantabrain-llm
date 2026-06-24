@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from fantabrain_llm.fallback_eval import (
     SAFE_FALLBACK_RESPONSE,
     FallbackEvalError,
     FinalSource,
+    render_fallback_eval_markdown,
     run_fallback_eval,
+    write_fallback_eval_outputs,
 )
 from fantabrain_llm.openai_fallback import FallbackResponse, FallbackUsage
 
@@ -216,3 +221,62 @@ def test_invalid_field_raises_fallback_eval_error() -> None:
             [prediction_record(case_id=True)],  # type: ignore[arg-type]
             fallback_client=client,
         )
+
+
+def test_render_fallback_eval_markdown_includes_summary_and_flagged_case() -> None:
+    client = FakeFallbackClient(
+        fallback_response("Sceglierei 3-4-2-1, restando sui moduli citati.")
+    )
+
+    report = run_fallback_eval(
+        [
+            prediction_record(case_id=1),
+            prediction_record(case_id=2, prediction="Sceglierei 4-5-1."),
+        ],
+        fallback_client=client,
+    )
+
+    markdown = render_fallback_eval_markdown(report)
+
+    assert "# OpenAI Fallback Eval Report" in markdown
+    assert "Cases: 2" in markdown
+    assert "fallback_used_count: 1" in markdown
+    assert "Case 2: mantra / lineup_advice" in markdown
+    assert "Final source: fallback" in markdown
+
+
+def test_write_fallback_eval_outputs_writes_json_markdown_and_jsonl(
+    tmp_path: Path,
+) -> None:
+    client = FakeFallbackClient(
+        fallback_response("Sceglierei 3-4-2-1, restando sui moduli citati.")
+    )
+    report = run_fallback_eval(
+        [
+            prediction_record(case_id=1),
+            prediction_record(case_id=2, prediction="Sceglierei 4-5-1."),
+        ],
+        fallback_client=client,
+    )
+
+    json_path, markdown_path, predictions_path = write_fallback_eval_outputs(
+        report,
+        tmp_path,
+    )
+
+    assert json_path.name == "fallback_eval.json"
+    assert markdown_path.name == "fallback_eval.md"
+    assert predictions_path.name == "fallback_predictions.jsonl"
+    payload = json.loads(json_path.read_text(encoding="utf-8"))
+    assert payload["cases"] == 2
+    assert payload["fallback_used_count"] == 1
+    rows = [
+        json.loads(line)
+        for line in predictions_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert rows[0]["case_id"] == 1
+    assert rows[0]["prediction"] == "Sceglierei 3-4-2-1 se hai copertura sugli esterni."
+    assert rows[0]["final_source"] == "primary"
+    assert rows[1]["case_id"] == 2
+    assert rows[1]["prediction"] == "Sceglierei 3-4-2-1, restando sui moduli citati."
+    assert rows[1]["final_source"] == "fallback"

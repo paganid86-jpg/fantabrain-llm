@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import json
 from collections import Counter
 from dataclasses import dataclass
 from enum import StrEnum
+from pathlib import Path
 from typing import Protocol
 
 from fantabrain_llm.openai_fallback import FallbackResponse, FallbackUsage
@@ -292,3 +294,111 @@ def _require_int(record: dict[str, object], field: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise FallbackEvalError(f"fallback eval record {field!r} must be an integer")
     return value
+
+
+def render_fallback_eval_markdown(report: FallbackEvalReport) -> str:
+    lines = [
+        "# OpenAI Fallback Eval Report",
+        "",
+        f"Cases: {report.cases}",
+        "",
+        "## Summary",
+        "",
+        f"- fallback_used_count: {report.fallback_used_count}",
+        f"- fallback_success_count: {report.fallback_success_count}",
+        f"- unresolved_safe_count: {report.unresolved_safe_count}",
+        f"- estimated_total_cost_usd: {report.estimated_total_cost_usd}",
+        "",
+        "## Primary Action Counts",
+        "",
+    ]
+    lines.extend(_counter_lines(report.primary_action_counts))
+    lines.extend(["", "## Final Source Counts", ""])
+    lines.extend(_counter_lines(report.final_source_counts))
+    lines.extend(["", "## Primary Violation Counts", ""])
+    lines.extend(_counter_lines(report.primary_violation_counts))
+    lines.extend(["", "## Final Violation Counts", ""])
+    lines.extend(_counter_lines(report.final_violation_counts))
+    lines.extend(["", "## Fallback Cases", ""])
+
+    fallback_results = [result for result in report.results if result.fallback_used]
+    if not fallback_results:
+        lines.append("- No fallback cases")
+
+    for result in fallback_results:
+        lines.extend(
+            [
+                f"### Case {result.case_id}: {result.mode} / {result.task}",
+                "",
+                f"- Primary action: {result.primary_action}",
+                f"- Fallback action: {result.fallback_action}",
+                f"- Final source: {result.final_source.value}",
+                f"- Estimated cost USD: {result.estimated_cost_usd}",
+            ]
+        )
+        if result.primary_violations:
+            lines.append("- Primary violations:")
+            for violation in result.primary_violations:
+                lines.append(f"  - {violation['check']}: `{violation['term']}`")
+        else:
+            lines.append("- Primary violations: none")
+        if result.fallback_violations:
+            lines.append("- Fallback violations:")
+            for violation in result.fallback_violations:
+                lines.append(f"  - {violation['check']}: `{violation['term']}`")
+        else:
+            lines.append("- Fallback violations: none")
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def write_fallback_eval_outputs(
+    report: FallbackEvalReport,
+    output_dir: str | Path,
+) -> tuple[Path, Path, Path]:
+    target = Path(output_dir)
+    target.mkdir(parents=True, exist_ok=True)
+
+    json_path = target / "fallback_eval.json"
+    markdown_path = target / "fallback_eval.md"
+    predictions_path = target / "fallback_predictions.jsonl"
+
+    json_path.write_text(
+        json.dumps(report.to_dict(), indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    markdown_path.write_text(render_fallback_eval_markdown(report), encoding="utf-8")
+    with predictions_path.open("w", encoding="utf-8", newline="\n") as handle:
+        for result in report.results:
+            handle.write(
+                json.dumps(_fallback_prediction_row(result), ensure_ascii=False) + "\n"
+            )
+
+    return json_path, markdown_path, predictions_path
+
+
+def _fallback_prediction_row(result: FallbackCaseResult) -> dict[str, object]:
+    return {
+        "case_id": result.case_id,
+        "mode": result.mode,
+        "task": result.task,
+        "prompt": result.prompt,
+        "expected": result.expected,
+        "prediction": result.final_prediction,
+        "primary_prediction": result.primary_prediction,
+        "primary_action": result.primary_action,
+        "primary_reason": result.primary_reason,
+        "fallback_used": result.fallback_used,
+        "fallback_prediction": result.fallback_prediction,
+        "fallback_action": result.fallback_action,
+        "fallback_reason": result.fallback_reason,
+        "final_source": result.final_source.value,
+        "estimated_cost_usd": result.estimated_cost_usd,
+    }
+
+
+def _counter_lines(counter: dict[str, int]) -> list[str]:
+    if not counter:
+        return ["- none: 0"]
+    return [f"- {key}: {value}" for key, value in counter.items()]
